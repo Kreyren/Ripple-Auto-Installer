@@ -35,17 +35,19 @@ if [ -x $(command -v "apt") ]; then
 fi
 
 # Setting GO Path
-echo 'export GOPATH=$HOME/go' >> ~/.bashrc
-echo 'export PATH=${PATH}:${GOPATH}/bin' >> ~/.bashrc
-source ~/.bashrc
+# STUB: Should be handled using wrapper, scripts should never touch ~/.bashrc
+if ! grep -q "export GOPATH="$HOME/go"" "$HOME/.bashrc"; then printf "export GOPATH="%s/go"" "$HOME" >> "$HOME/.bashrc" ; fi
 
-# Cloning Hanayo (from zxq.co), github?;old
-sudo go get -u zxq.co/ripple/hanayo
-cd go/src/zxq.co/ripple/hanayo
-sudo go build .
+if ! grep -q "export PATH="${PATH}:${GOPATH}/bin"" "$HOME/.bashrc"; then printf "export PATH="%s:%s/bin"" "${PATH}" "${GOPATH}" >> "$HOME/.bashrc" ; fi
 
-# Make Sure to press "enter" and type "I agree" (hanayo licence agreement)
-./hanayo
-clear
-./hanayo
-echo "Done! You Can Now view your site in localhost:45221"
+source "$HOME/.bashrc"
+
+  echo "Setting up Hanayo..."
+
+  my_sudo go get -u zxq.co/ripple/hanayo
+  cd go/src/zxq.co/ripple/hanayo
+  my_sudo go build .
+  exec hanayo
+
+  sed -i 's#ListenTo=#ListenTo=127.0.0.1:'$hanayo_port'#g; hanayo.conf
+  exec hanayo && echo "Hanayo is running at localhost:"$hanayo_port
