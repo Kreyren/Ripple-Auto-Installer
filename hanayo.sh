@@ -1,6 +1,31 @@
-#!/bin/bash
-clear
+#!/usr/bin/env bash
 
+# HELPER: sudo wrapper
+my_sudo() { [ -x $(command -v "sudo") ] && printf "${EUID:+sudo }" ; }
+
+# HELPER: Die
+if ! command -v "die" > /dev/null; then	die()	{
+  	case $1 in
+    8)	printf "FATAL: This distribution is not supported by this script %s\n" 1>&2 ; exit $1 ;;
+		# Custom
+		*)	(printf "FATAL: Syntax error $([ -n "${FUNCNAME[0]}" ] && printf "in ${FUNCNAME[0]}")\n%s\n" "$2"	1>&2	;	exit "$1") || (printf "FATAL: %s\n" "$1" 1>&2 ; exit $1)
+	esac
+} fi
+
+declare hanayo_port
+
+askPrerequisites() {
+  valid_domain=0
+
+  #Ask user for port to use for frontend
+  printf "\n\n..:: FRONTEND ::.."
+  printf "\nPort [6969]: "
+  read hanayo_port
+  hanayo_port=${hanayo_port:=6969}
+}
+
+
+setup-hanayo() {
 # Updating Is Necessary (at first)
 sudo apt-get update && sudo apt-get update -y
 sudo apt-get install git -y
