@@ -27,12 +27,12 @@ askPrerequisites() {
 
 setup-hanayo() {
 # Updating Is Necessary (at first)
-sudo apt-get update && sudo apt-get update -y
-sudo apt-get install git -y
-sudo add-apt-repository ppa:longsleep/golang-backports -y
-sudo apt-get update
-sudo apt-get install golang-go -y
-sudo apt-get update && sudo apt-get update -y
+if [ -x $(command -v "apt") ]; then
+  # Update repositories
+  my_sudo apt {update,upgrade,dist-upgrade,install git} -y
+  # Update ubuntu and install deps
+  if grep -q 'Ubuntu' /etc/os-release; then my_sudo add-apt-repository ppa:longsleep/golang-backports -y && my_sudo apt install golang-go -y ; else die 8 ; fi
+fi
 
 # Setting GO Path
 echo 'export GOPATH=$HOME/go' >> ~/.bashrc
