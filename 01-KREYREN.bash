@@ -25,9 +25,40 @@
 # GLOBAL
 
 # Sanitization for API used
-[ -e "/tmp/00-ripple-api.bash" ] && (source "/tmp/00-ripple-api.bash" || die 1 "Unable to fetch ripple API") || warn "Unable to source ripple-api, trying to fetch" && (wget "https://raw.githubusercontent.com/Kreyren/Ripple-Auto-Installer/kreyrenizing/00-ripple-api.bash" -O "/tmp/00-ripple-api.bash" || die 1 "Unable to fetch ripple-api") && (source "/tmp/00-ripple-api.bash" && einfo "ripple-api was fetched and sourced" || die 1 "Failed to source ripple-api")
+# [ -e "/tmp/00-ripple-api.bash" ] && (source "/tmp/00-ripple-api.bash" || die 1 "Unable to fetch ripple API") || warn "Unable to source ripple-api, trying to fetch" && (wget "https://raw.githubusercontent.com/Kreyren/Ripple-Auto-Installer/kreyrenizing/00-ripple-api.bash" -O "/tmp/00-ripple-api.bash" || die 1 "Unable to fetch ripple-api") && (source "/tmp/00-ripple-api.bash" && einfo "ripple-api was fetched and sourced" || die 1 "Failed to source ripple-api")
+
+# Error handling
+if ! command -v "einfo" > /dev/null; then einfo() { printf "INFO: %s\n" "${*}" 1>&2 ; } ; fi
+if ! command -v "warn" > /dev/null; then warn() { printf "WARN: %s\n" "${*}" 1>&2 ; } ; fi
+if ! command -v "edebug" > /dev/null; then edebug() { printf "DEBUG: %s\n" "${*}" 1>&2 ; } ; fi
+die() { printf "FATAL: ${*}\n" 1>&2 ; exit 1 ; }
+if ! command -v "die" > /dev/null; then	die()	{
+  	case $1 in
+    8)	printf "FATAL: This distribution is not supported by this script %s\n" 1>&2 ; exit $1 ;;
+		# Custom
+    wtf) printf "FATAL: Unexpected result in ${FUNCNAME[0]}" ;;
+		*)	(printf "FATAL: Syntax error $([ -n "${FUNCNAME[0]}" ] && printf "in ${FUNCNAME[0]}")\n%s\n" "$2"	1>&2	;	exit "$1") || (printf "FATAL: %s\n" "$1" 1>&2 ; exit $1)
+	esac
+} fi
 
 # FUNCTIONS
+
+checkroot() { # Check if executed as root, if not tries to use sudo if KREYREN variable is not blank
+  # Licenced by github.com/kreyren under GPL-2
+	if [[ "$EUID" == 0 ]]; then
+		return
+	elif [[ -x "$(command -v "sudo")" ]] && [ -n "$KREYREN" ]; then
+			einfo "Failed to aquire root permission, trying reinvoking with 'sudo' prefix"
+			exec sudo "$0" "$@" || die 3
+			die 0
+	elif [[ ! -x "$(command -v "sudo")" ]] && [ -n "$KREYREN" ]; then
+		einfo "Failed to aquire root permission, trying reinvoking as root user."
+		exec su -c "$0 $*" || die 3
+		die 0
+	else
+		die 3
+	fi
+}
 
 action() {
 # Fetch repositories
