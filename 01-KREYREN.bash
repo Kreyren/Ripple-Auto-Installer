@@ -22,6 +22,7 @@
 ###X cheesegull (https://zxq.co/ripple/cheesegull)
 ###X avatarserver (https://zxq.co/Sunpy/avatar-server-go)
 
+action() {
 # Sanitization for API used
 [ -e /etc/bash/00-ripple-api.bash ] && (source /etc/bash/00-ripple-api.bash || die 1 "Unable to fetch ripple API") || warn "Unable to source ripple-api, trying to fetch" && (wget https://raw.githubusercontent.com/Kreyren/Ripple-Auto-Installer/kreyrenizing/00-ripple-api.bash -O /etc/bash/00-ripple-api.bash || die 1 "Unable to fetch ripple-api") && (source /etc/bash/00-ripple-api.bash && einfo "ripple-api was fetched and sourced" || die 1 "Failed to source ripple-api")
 
@@ -31,6 +32,8 @@
 [ ! -e "/usr/src/rippleapi" ] && (git clone https://zxq.co/ripple/rippleapi.git || die 1 "Unable to fetch ripple/rippleapi") || edebug "Directory /usr/src/rippleapi alredy exists"
 [ ! -e "/usr/src/chesegull" ] && (git clone https://zxq.co/ripple/chesegull.git || die 1 "Unable to fetch ripple/chesegull") || edebug "Directory /usr/src/chesegull alredy exists"
 [ ! -e "/usr/src/avatar-server-go" ] && (git clone https://zxq.co/Sunpy/avatar-server-go.git || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory /usr/src/lets alredy exists"
+}
+
 
 checkroot "$@" && while [[ "$#" -gt 0 ]]; do case "$1" in
 	# TODO: Capture $1 and $2 for MFH
@@ -46,6 +49,7 @@ checkroot "$@" && while [[ "$#" -gt 0 ]]; do case "$1" in
 		else die "Unexpected result in -mfh logic"
 		fi
 	;;
+  -action) action ;;
 	-d|--debug) debug="true" ; shift ;;
 	-h|--help) printf "STUB: HELP_PAGE" ;;
 	"") die 0 ;; # Needed to output success
