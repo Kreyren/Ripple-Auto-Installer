@@ -50,24 +50,24 @@ else edebug() { true ; }
 fi
 if ! command -v die > /dev/null; then	die()	{
 	case $1 in
-		0|true)	true && ([ -n "$debug" ] && edebug "Script returned true") ;; # TRUE
+		0|true)	([ -n "$debug" ] && edebug "Script returned true") ; exit "$1" ;; # TRUE
 		1|false)  ([ -n "$2" ] && printf "FATAL: %s\n" "$2" 1>&2 ; exit "$1") || (printf "FATAL: Script returned false $([ -n "$EUID" ] && printf "EUID ($EUID)") ${FUNCNAME[0]}\n" 1>&2 ; exit "$1") ;;
 		# Syntax err
-		2)	([ -n "$2" ] && printf "FATAL: %s\n" "$2" 1>&2 ; exit "$1") || (printf "FATAL: Syntax error $0 $1 $2 $3 in ${FUNCNAME[0]}\n" 1>&2 ; exit "$1") ;;
+		2)	([ -n "$2" ] && printf "FATAL: %s\n" "$2" 1>&2 ; exit "$1") || (printf "FATAL: Syntax error $([ -n "$debug" ] && printf "$0 $1 $2 $3 in ${FUNCNAME[0]}")\n" 1>&2 ; exit "$1") ;;
 		# Permission issue
 		3)	([ -n "$2" ] && printf "FATAL: %s\n" "$2" 1>&2 ; exit "$1") || (printf "FATAL: Unable to elevate root access from $([ -n "$EUID" ] && printf "EUID ($EUID)")\n"	1>&2	;	exit "$1")	;;
 		# Custom
-    wtf) printf "FATAL: Unexpected result in ${FUNCNAME[0]}" ;;
-    kreyren) printf "Killed by kreyren" ;;
-		*)	printf "FATAL: %s\n" "$2" 1>&2 ; exit "$1" ;;
-	esac
-} fi
+    wtf) printf "FATAL: Unexpected result in ${FUNCNAME[0]}\n" ;;
+    kreyren) printf "Killed by kreyren\n" ;;
+		*)	printf "FATAL: %s\n" "$2" 1>&2 ; exit 1 ;;
+	esac }
+fi
 
 # FUNCTIONS
 
 checkroot() { # Check if executed as root, if not tries to use sudo if KREYREN variable is not blank
   # Licenced by github.com/kreyren under GPL-2
-	if [[ "$EUID" == 0 ]]; then
+	if [[ "$EUID" == '0' ]]; then
 		return
 	elif [[ -x "$(command -v "sudo")" ]] && [ -n "$KREYREN" ]; then
 			einfo "Failed to aquire root permission, trying reinvoking with 'sudo' prefix"
@@ -83,39 +83,27 @@ checkroot() { # Check if executed as root, if not tries to use sudo if KREYREN v
 }
 
 action() {
-# Fetch repositories
-[ ! -e "/usr/src/lets" ] && (git clone https://zxq.co/ripple/lets.git /usr/src/lets || die 1 "Unable to fetch ripple/lets") || edebug "Directory /usr/src/lets alredy exists"
-[ ! -e "/usr/src/hanayo" ] && (git clone https://zxq.co/ripple/hanayo.git /usr/src/hanayo || die 1 "Unable to fetch ripple/hanayo") || edebug "Directory /usr/src/hanayo alredy exists"
-[ ! -e "/usr/src/rippleapi" ] && (git clone https://zxq.co/ripple/rippleapi.git /usr/src/rippleapi || die 1 "Unable to fetch ripple/rippleapi") || edebug "Directory /usr/src/rippleapi alredy exists"
-[ ! -e "/usr/src/cheesegull" ] && (git clone https://zxq.co/ripple/cheesegull.git /usr/src/cheesegull || die 1 "Unable to fetch ripple/chesegull") || edebug "Directory /usr/src/chesegull alredy exists"
-[ ! -e "/usr/src/avatar-server-go" ] && (git clone https://zxq.co/Sunpy/avatar-server-go.git /usr/src/avatar-server-go || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory /usr/src/lets alredy exists"
-[ ! -e "/usr/src/pep.py" ] && (git clone https://zxq.co/ripple/pep.py.git /usr/src/pep.py || die 1 "Unable to fetch Sunpy/pep.py") || edebug "Directory /usr/src/lets alredy exists"
+  # Fetch repositories
+  [ ! -e "/usr/src/lets" ] && (git clone https://zxq.co/ripple/lets.git /usr/src/lets || die 1 "Unable to fetch ripple/lets") || edebug "Directory /usr/src/lets alredy exists"
+  [ ! -e "/usr/src/hanayo" ] && (git clone https://zxq.co/ripple/hanayo.git /usr/src/hanayo || die 1 "Unable to fetch ripple/hanayo") || edebug "Directory /usr/src/hanayo alredy exists"
+  [ ! -e "/usr/src/rippleapi" ] && (git clone https://zxq.co/ripple/rippleapi.git /usr/src/rippleapi || die 1 "Unable to fetch ripple/rippleapi") || edebug "Directory /usr/src/rippleapi alredy exists"
+  [ ! -e "/usr/src/cheesegull" ] && (git clone https://zxq.co/ripple/cheesegull.git /usr/src/cheesegull || die 1 "Unable to fetch ripple/chesegull") || edebug "Directory /usr/src/chesegull alredy exists"
+  [ ! -e "/usr/src/avatar-server-go" ] && (git clone https://zxq.co/Sunpy/avatar-server-go.git /usr/src/avatar-server-go || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory /usr/src/lets alredy exists"
+  [ ! -e "/usr/src/pep.py" ] && (git clone https://zxq.co/ripple/pep.py.git /usr/src/pep.py || die 1 "Unable to fetch Sunpy/pep.py") || edebug "Directory /usr/src/lets alredy exists"
 
-[ ! -x $(command -v "mysql_config") ] && die 1 "Command 'mysql_config' is not executable"
+  # STUB: investigate
+  if ! command -v mysql_config >/dev/null; then die 1 "Command 'mysql_config' is not executable" ; fi
 
-pip3 install -r /usr/src/lets/requirements.txt && edebug "pip3 returned true for /usr/src/lets/requirements.txt" || die "pip3 failed to fetch required packages"
+  return
 
-die 0
+  pip3 install -r /usr/src/lets/requirements.txt && edebug "pip3 returned true for /usr/src/lets/requirements.txt" || die "pip3 failed to fetch required packages"
 }
 
 # LOGIC
 
-checkroot "$@" && while [[ "$#" -gt 0 ]]; do case "$1" in
-  --action)
-    if [[ "$2" != -* ]] && [[ "$3" != -* ]]; then
-			action "$2" "$3"
-			shift 3
-		elif [[ "$2" != -* ]] && [[ "$3" == -* ]]; then
-			action "$1"
-			shift 2
-		elif [[ "$2" == -* ]] && [[ "$3" == -* ]]; then
-      action
-			shift 1
-		else die wtf
-		fi
-  ;;
-	-d|--debug) debug="true" ; shift ;;
-	-h|--help) printf "STUB: HELP_PAGE" ;;
-	"") action ; die 0 ;; # Needed to output success
+checkroot "$@" && while [[ "$#" -ge 0 ]]; do case "$1" in
+	-h|-\?|--help) printf "STUB: HELP_PAGE" && break ;;
+	-d|--debug) export debug="true" ; shift 1 ;;
+	"") action ;;
 	*) die 2 ; break
 esac; done
