@@ -22,12 +22,12 @@
 ###X cheesegull (https://zxq.co/ripple/cheesegull)
 ###X avatarserver (https://zxq.co/Sunpy/avatar-server-go)
 
-action2() {
-# Sanitization for API used
-[ ! -e "/etc/bash" ] && (mkdir "/etc/bash" || die 1 "Unable to make a new directory in /etc/bash") || edebug "Directory /etc/bash already exists"
+# GLOBAL
 
-[ -e "/etc/bash/00-ripple-api.bash" ] && (source "/etc/bash/00-ripple-api.bash" || die 1 "Unable to fetch ripple API") || warn "Unable to source ripple-api, trying to fetch" && (wget "https://raw.githubusercontent.com/Kreyren/Ripple-Auto-Installer/kreyrenizing/00-ripple-api.bash" -O "/etc/bash/00-ripple-api.bash" || die 1 "Unable to fetch ripple-api") && (source "/etc/bash/00-ripple-api.bash" && einfo "ripple-api was fetched and sourced" || die 1 "Failed to source ripple-api")
-}
+# Sanitization for API used
+[ -e "/tmp/00-ripple-api.bash" ] && (source "/tmp/00-ripple-api.bash" || die 1 "Unable to fetch ripple API") || warn "Unable to source ripple-api, trying to fetch" && (wget "https://raw.githubusercontent.com/Kreyren/Ripple-Auto-Installer/kreyrenizing/00-ripple-api.bash" -O "/tmp/00-ripple-api.bash" || die 1 "Unable to fetch ripple-api") && (source "/tmp/00-ripple-api.bash" && einfo "ripple-api was fetched and sourced" || die 1 "Failed to source ripple-api")
+
+# FUNCTIONS
 
 action() {
 # Fetch repositories
@@ -38,6 +38,7 @@ action() {
 [ ! -e "/usr/src/avatar-server-go" ] && (git clone https://zxq.co/Sunpy/avatar-server-go.git || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory /usr/src/lets alredy exists"
 }
 
+# LOGIC
 
 checkroot "$@" && while [[ "$#" -gt 0 ]]; do case "$1" in
 	# TODO: Capture $1 and $2 for MFH
