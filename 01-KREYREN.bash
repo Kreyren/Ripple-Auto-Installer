@@ -22,10 +22,10 @@
 ###X cheesegull (https://zxq.co/ripple/cheesegull)
 ###X avatarserver (https://zxq.co/Sunpy/avatar-server-go)
 
-action() {
 # Sanitization for API used
 [ -e /etc/bash/00-ripple-api.bash ] && (source /etc/bash/00-ripple-api.bash || die 1 "Unable to fetch ripple API") || warn "Unable to source ripple-api, trying to fetch" && (wget https://raw.githubusercontent.com/Kreyren/Ripple-Auto-Installer/kreyrenizing/00-ripple-api.bash -O /etc/bash/00-ripple-api.bash || die 1 "Unable to fetch ripple-api") && (source /etc/bash/00-ripple-api.bash && einfo "ripple-api was fetched and sourced" || die 1 "Failed to source ripple-api")
 
+action() {
 # Fetch repositories
 [ ! -e "/usr/src/lets" ] && (git clone https://zxq.co/ripple/lets.git || die 1 "Unable to fetch ripple/lets") || edebug "Directory /usr/src/lets alredy exists"
 [ ! -e "/usr/src/hanayo" ] && (git clone https://zxq.co/ripple/hanayo.git || die 1 "Unable to fetch ripple/hanayo") || edebug "Directory /usr/src/hanayo alredy exists"
