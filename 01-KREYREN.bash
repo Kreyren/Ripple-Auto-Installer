@@ -20,7 +20,7 @@
 ###X hanayo (https://zxq.co/ripple/hanayo)
 ###X rippleapi (https://zxq.co/ripple/rippleapi)
 ###X cheesegull (https://zxq.co/ripple/cheesegull)
-### avatarserver (https://zxq.co/Sunpy/avatar-server-go)
+###X avatarserver (https://zxq.co/Sunpy/avatar-server-go)
 
 source 00-ripple-api.bash || warn "Unable to fetch ripple API"
 
@@ -30,3 +30,23 @@ source 00-ripple-api.bash || warn "Unable to fetch ripple API"
 [ ! -e "/usr/src/rippleapi" ] && (git clone https://zxq.co/ripple/rippleapi.git || die 1 "Unable to fetch ripple/rippleapi") || edebug "Directory /usr/src/rippleapi alredy exists"
 [ ! -e "/usr/src/chesegull" ] && (git clone https://zxq.co/ripple/chesegull.git || die 1 "Unable to fetch ripple/chesegull") || edebug "Directory /usr/src/chesegull alredy exists"
 [ ! -e "/usr/src/avatar-server-go" ] && (git clone https://zxq.co/Sunpy/avatar-server-go.git || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory /usr/src/lets alredy exists"
+
+checkroot "$@" && while [[ "$#" -gt 0 ]]; do case "$1" in
+	# TODO: Capture $1 and $2 for MFH
+	-mfh|--make-file-hierarchy|-MFH)
+		if [[ "$2" != -* ]] && [[ "$3" != -* ]]; then
+			MFH "$2" "$3"
+			shift 3
+		elif [[ "$2" != -* ]] && [[ "$3" == -* ]]; then
+			MFH "$1"
+			shift 1
+		elif [[ "$2" == -* ]] && [[ "$3" == -* ]]; then
+			shift 1
+		else die "Unexpected result in -mfh logic"
+		fi
+	;;
+	-d|--debug) debug="true" ; shift ;;
+	-h|--help) printf "STUB: HELP_PAGE" ;;
+	"") die 0 ;; # Needed to output success
+	*) die 2 ; break
+esac; done
