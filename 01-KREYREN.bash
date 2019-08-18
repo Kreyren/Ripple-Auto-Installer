@@ -21,6 +21,7 @@
 ###X rippleapi (https://zxq.co/ripple/rippleapi)
 ###X cheesegull (https://zxq.co/ripple/cheesegull)
 ###X avatarserver (https://zxq.co/Sunpy/avatar-server-go)
+###X pyp.pi (https://zxq.co/ripple/pep.py)
 
 # GLOBAL
 
@@ -75,6 +76,7 @@ action() {
 [ ! -e "/usr/src/rippleapi" ] && (git clone https://zxq.co/ripple/rippleapi.git /usr/src/rippleapi || die 1 "Unable to fetch ripple/rippleapi") || edebug "Directory /usr/src/rippleapi alredy exists"
 [ ! -e "/usr/src/cheesegull" ] && (git clone https://zxq.co/ripple/cheesegull.git /usr/src/cheesegull || die 1 "Unable to fetch ripple/chesegull") || edebug "Directory /usr/src/chesegull alredy exists"
 [ ! -e "/usr/src/avatar-server-go" ] && (git clone https://zxq.co/Sunpy/avatar-server-go.git /usr/src/avatar-server-go || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory /usr/src/lets alredy exists"
+[ ! -e "/usr/src/pep.py" ] && (git clone https://zxq.co/ripple/pep.py.git /usr/src/pep.py || die 1 "Unable to fetch Sunpy/pep.py") || edebug "Directory /usr/src/lets alredy exists"
 
 die 0
 }
@@ -96,6 +98,7 @@ checkroot "$@" && while [[ "$#" -gt 0 ]]; do case "$1" in
 		fi
   ;;
 	-d|--debug) debug="true" ; shift ;;
+  --magic) KREYREN="god" ; shift ;;
 	-h|--help) printf "STUB: HELP_PAGE" ;;
 	"") action ; die 0 ;; # Needed to output success
 	*) die 2 ; break
