@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+# ABSTRACT
+## fetch deps
+### Python 3.5.1 / expecting 3.6
+### PHP (5.6.4 tested)
+### MySQL (5.6.18 tested)
+#### mariadb
+#### local database
+### pep.py
+### lets
+### avatar-server
+### rippleapi
+### hanayo
+### nginx (1.9.11 tested)
+#### Alternatively Apache
+### orders?
+## Fetch repositories
+###X lets (https://zxq.co/ripple/lets)
+###X hanayo (https://zxq.co/ripple/hanayo)
+###X rippleapi (https://zxq.co/ripple/rippleapi)
+###X cheesegull (https://zxq.co/ripple/cheesegull)
+### avatarserver (https://zxq.co/Sunpy/avatar-server-go)
+
+source 00-ripple-api.bash || warn "Unable to fetch ripple API"
+
+# Fetch repositories
+[ ! -e "/usr/src/lets" ] && (git clone https://zxq.co/ripple/lets.git || die 1 "Unable to fetch ripple/lets") || edebug "Directory /usr/src/lets alredy exists"
+[ ! -e "/usr/src/hanayo" ] && (git clone https://zxq.co/ripple/hanayo.git || die 1 "Unable to fetch ripple/hanayo") || edebug "Directory /usr/src/hanayo alredy exists"
+[ ! -e "/usr/src/rippleapi" ] && (git clone https://zxq.co/ripple/rippleapi.git || die 1 "Unable to fetch ripple/rippleapi") || edebug "Directory /usr/src/rippleapi alredy exists"
+[ ! -e "/usr/src/chesegull" ] && (git clone https://zxq.co/ripple/chesegull.git || die 1 "Unable to fetch ripple/chesegull") || edebug "Directory /usr/src/chesegull alredy exists"
+[ ! -e "/usr/src/avatar-server-go" ] && (git clone https://zxq.co/Sunpy/avatar-server-go.git || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory /usr/src/lets alredy exists"
