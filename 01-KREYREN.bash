@@ -36,8 +36,8 @@ else edebug() { true ; }
 fi
 if ! command -v die > /dev/null; then	die()	{
 	case $1 in
-		0)	true && ([ -n "$debug" ] && edebug "Script returned true") ;; # TRUE
-		1)	false	;; # FALSE
+		0|true)	true && ([ -n "$debug" ] && edebug "Script returned true") ;; # TRUE
+		1|false)	false	;; # FALSE
 		# Syntax err
 		2)	([ -n "$2" ] && printf "FATAL: %s\n" "$2" 1>&2 ; exit "$1") || (printf "FATAL: Syntax error $0 $1 $2 $3 in ${FUNCNAME[0]}\n" 1>&2 ; exit "$1") ;;
 		# Permission issue
