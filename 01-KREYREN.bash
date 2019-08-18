@@ -69,11 +69,11 @@ checkroot() { # Check if executed as root, if not tries to use sudo if KREYREN v
 
 action() {
 # Fetch repositories
-[ ! -e "/usr/src/lets" ] && (git clone https://zxq.co/ripple/lets.git || die 1 "Unable to fetch ripple/lets") || edebug "Directory /usr/src/lets alredy exists"
-[ ! -e "/usr/src/hanayo" ] && (git clone https://zxq.co/ripple/hanayo.git || die 1 "Unable to fetch ripple/hanayo") || edebug "Directory /usr/src/hanayo alredy exists"
-[ ! -e "/usr/src/rippleapi" ] && (git clone https://zxq.co/ripple/rippleapi.git || die 1 "Unable to fetch ripple/rippleapi") || edebug "Directory /usr/src/rippleapi alredy exists"
-[ ! -e "/usr/src/chesegull" ] && (git clone https://zxq.co/ripple/chesegull.git || die 1 "Unable to fetch ripple/chesegull") || edebug "Directory /usr/src/chesegull alredy exists"
-[ ! -e "/usr/src/avatar-server-go" ] && (git clone https://zxq.co/Sunpy/avatar-server-go.git || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory /usr/src/lets alredy exists"
+[ ! -e "/usr/src/lets" ] && (git clone https://zxq.co/ripple/lets.git /usr/src/ || die 1 "Unable to fetch ripple/lets") || edebug "Directory /usr/src/lets alredy exists"
+[ ! -e "/usr/src/hanayo" ] && (git clone https://zxq.co/ripple/hanayo.git /usr/src/ || die 1 "Unable to fetch ripple/hanayo") || edebug "Directory /usr/src/hanayo alredy exists"
+[ ! -e "/usr/src/rippleapi" ] && (git clone https://zxq.co/ripple/rippleapi.git /usr/src/ || die 1 "Unable to fetch ripple/rippleapi") || edebug "Directory /usr/src/rippleapi alredy exists"
+[ ! -e "/usr/src/chesegull" ] && (git clone https://zxq.co/ripple/chesegull.git /usr/src/ || die 1 "Unable to fetch ripple/chesegull") || edebug "Directory /usr/src/chesegull alredy exists"
+[ ! -e "/usr/src/avatar-server-go" ] && (git clone https://zxq.co/Sunpy/avatar-server-go.git /usr/src/ || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory /usr/src/lets alredy exists"
 }
 
 # LOGIC
