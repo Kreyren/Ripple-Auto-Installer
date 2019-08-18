@@ -5,8 +5,9 @@
 ### Python 3.5.1 / expecting 3.6
 ### PHP (5.6.4 tested)
 ### MySQL (5.6.18 tested)
-#### mariadb
 #### local database
+#### sqlite
+#### mariadb
 ### pep.py
 ### lets
 ### avatar-server
@@ -22,6 +23,18 @@
 ###X cheesegull (https://zxq.co/ripple/cheesegull)
 ###X avatarserver (https://zxq.co/Sunpy/avatar-server-go)
 ###X pyp.pi (https://zxq.co/ripple/pep.py)
+## Configure everything (mysql pep.py lets avatar-server rippleapi hanayo nginx)
+### mysql
+#### Fetch package
+##### Debian: mysql-server / default-mysql-server / default-mysql-server-core (preffered?)
+### pep.py
+#### Deprecated 29 june 2019
+### LETS
+#### git submodule init && git submodule update -> https://gist.github.com/Kreyren/27bf5a6cf1aacba3d7b3fabdb8555c8b
+#### pip install -r requirements.txt
+##### pip reguired (DEBIAN: python3-pip)
+
+
 
 # GLOBAL
 
@@ -38,7 +51,7 @@ fi
 if ! command -v die > /dev/null; then	die()	{
 	case $1 in
 		0|true)	true && ([ -n "$debug" ] && edebug "Script returned true") ;; # TRUE
-		1|false)	false	;; # FALSE
+		1|false)  ([ -n "$2" ] && printf "FATAL: %s\n" "$2" 1>&2 ; exit "$1") || (printf "FATAL: Script returned false $([ -n "$EUID" ] && printf "EUID ($EUID)") ${FUNCNAME[0]}\n" 1>&2 ; exit "$1") ;;
 		# Syntax err
 		2)	([ -n "$2" ] && printf "FATAL: %s\n" "$2" 1>&2 ; exit "$1") || (printf "FATAL: Syntax error $0 $1 $2 $3 in ${FUNCNAME[0]}\n" 1>&2 ; exit "$1") ;;
 		# Permission issue
@@ -78,6 +91,10 @@ action() {
 [ ! -e "/usr/src/avatar-server-go" ] && (git clone https://zxq.co/Sunpy/avatar-server-go.git /usr/src/avatar-server-go || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory /usr/src/lets alredy exists"
 [ ! -e "/usr/src/pep.py" ] && (git clone https://zxq.co/ripple/pep.py.git /usr/src/pep.py || die 1 "Unable to fetch Sunpy/pep.py") || edebug "Directory /usr/src/lets alredy exists"
 
+[ ! -x $(command -v "mysql_config") ] && die 1 "Command 'mysql_config' is not executable"
+
+pip3 install -r /usr/src/lets/requirements.txt && edebug "pip3 returned true for /usr/src/lets/requirements.txt" || die "pip3 failed to fetch required packages"
+
 die 0
 }
 
@@ -90,15 +107,14 @@ checkroot "$@" && while [[ "$#" -gt 0 ]]; do case "$1" in
 			shift 3
 		elif [[ "$2" != -* ]] && [[ "$3" == -* ]]; then
 			action "$1"
-			shift 1
+			shift 2
 		elif [[ "$2" == -* ]] && [[ "$3" == -* ]]; then
       action
 			shift 1
-		else die "Unexpected result in -action logic"
+		else die wtf
 		fi
   ;;
 	-d|--debug) debug="true" ; shift ;;
-  --magic) KREYREN="god" ; shift ;;
 	-h|--help) printf "STUB: HELP_PAGE" ;;
 	"") action ; die 0 ;; # Needed to output success
 	*) die 2 ; break
