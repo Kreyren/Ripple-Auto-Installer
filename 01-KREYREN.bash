@@ -28,16 +28,23 @@
 # [ -e "/tmp/00-ripple-api.bash" ] && (source "/tmp/00-ripple-api.bash" || die 1 "Unable to fetch ripple API") || warn "Unable to source ripple-api, trying to fetch" && (wget "https://raw.githubusercontent.com/Kreyren/Ripple-Auto-Installer/kreyrenizing/00-ripple-api.bash" -O "/tmp/00-ripple-api.bash" || die 1 "Unable to fetch ripple-api") && (source "/tmp/00-ripple-api.bash" && einfo "ripple-api was fetched and sourced" || die 1 "Failed to source ripple-api")
 
 # Error handling
-if ! command -v "einfo" > /dev/null; then einfo() { printf "INFO: %s\n" "${*}" 1>&2 ; } ; fi
-if ! command -v "warn" > /dev/null; then warn() { printf "WARN: %s\n" "${*}" 1>&2 ; } ; fi
-if ! command -v "edebug" > /dev/null; then edebug() { printf "DEBUG: %s\n" "${*}" 1>&2 ; } ; fi
-die() { printf "FATAL: ${*}\n" 1>&2 ; exit 1 ; }
-if ! command -v "die" > /dev/null; then	die()	{
-  	case $1 in
-    8)	printf "FATAL: This distribution is not supported by this script %s\n" 1>&2 ; exit $1 ;;
+if ! command -v einfo > /dev/null; then	einfo()	{	printf "INFO: %s\n" "$1"	1>&2	;	} fi
+if ! command -v warn > /dev/null; then	warn()	{	printf "WARN: %s\n" "$1"	1>&2	;	} fi
+if [ -n "$debug" ]; then
+	edebug()	{	printf "DEBUG: %s\n" "$1"	1>&2	; }
+else edebug() { true ; }
+fi
+if ! command -v die > /dev/null; then	die()	{
+	case $1 in
+		0)	true	;; # TRUE
+		1)	false	;; # FALSE
+		# Syntax err
+		2)	([ -n "$2" ] && printf "FATAL: %s\n" "$2" 1>&2 ; exit "$1") || (printf "FATAL: Syntax error $0 $1 $2 $3 in ${FUNCNAME[0]}\n" 1>&2 ; exit "$1") ;;
+		# Permission issue
+		3)	([ -n "$2" ] && printf "FATAL: %s\n" "$2" 1>&2 ; exit "$1") || (printf "FATAL: Unable to elevate root access from $([ -n "$EUID" ] && printf "EUID ($EUID)")\n"	1>&2	;	exit "$1")	;;
 		# Custom
     wtf) printf "FATAL: Unexpected result in ${FUNCNAME[0]}" ;;
-		*)	(printf "FATAL: Syntax error $([ -n "${FUNCNAME[0]}" ] && printf "in ${FUNCNAME[0]}")\n%s\n" "$2"	1>&2	;	exit "$1") || (printf "FATAL: %s\n" "$1" 1>&2 ; exit $1)
+		*)	printf "FATAL: %s\n" "$2" 1>&2 ; exit "$1" ;;
 	esac
 } fi
 
