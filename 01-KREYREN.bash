@@ -111,6 +111,7 @@ action() {
 	#TODO: elif grep -qF "Debian" "/etc/os-release" && [ -n "$KREYREN" ]; then	einfo "This package depends on mysql_config from libmariadb-dev-compat on Debian which will be installed now" ; apt install libmariadb-dev-compat -y
 	fi
 
+	# TODO: Sanitization on required deps
   pip3 install -r /usr/src/lets/requirements.txt && edebug "pip3 returned true for /usr/src/lets/requirements.txt" || die "pip3 failed to fetch required packages"
 }
 
