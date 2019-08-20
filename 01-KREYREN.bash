@@ -20,7 +20,7 @@
 ###X lets (https://zxq.co/ripple/lets)
 ###X hanayo (https://zxq.co/ripple/hanayo)
 ###X rippleapi (https://zxq.co/ripple/rippleapi)
-###X cheesegull (https://zxq.co/ripple/cheesegull)
+### cheesegull (https://zxq.co/ripple/cheesegull) -> Removed based on uniminin
 ###X avatarserver (https://zxq.co/Sunpy/avatar-server-go)
 ###X pyp.pi (https://zxq.co/ripple/pep.py)
 ## Configure everything (mysql pep.py lets avatar-server rippleapi hanayo nginx)
@@ -104,7 +104,7 @@ action() {
   [ ! -e "/usr/src/hanayo" ] && (git clone https://zxq.co/ripple/hanayo.git /usr/src/hanayo || die 1 "Unable to fetch ripple/hanayo") || edebug "Directory /usr/src/hanayo alredy exists"
   [ ! -e "/usr/src/rippleapi" ] && (git clone https://zxq.co/ripple/rippleapi.git /usr/src/rippleapi || die 1 "Unable to fetch ripple/rippleapi") || edebug "Directory /usr/src/rippleapi alredy exists"
   [ ! -e "/usr/src/avatar-server-go" ] && (git clone https://zxq.co/Sunpy/avatar-server-go.git /usr/src/avatar-server-go || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory /usr/src/lets alredy exists"
-  [ ! -e "/usr/src/pep.py" ] && (git clone https://zxq.co/ripple/pep.py.git /usr/src/pep.py || die 1 "Unable to fetch Sunpy/pep.py") || edebug "Directory /usr/src/lets alredy exists"
+  #[ ! -e "/usr/src/pep.py" ] && (git clone https://zxq.co/ripple/pep.py.git /usr/src/pep.py || die 1 "Unable to fetch Sunpy/pep.py") || edebug "Directory /usr/src/lets alredy exists"
 
   # Required for lets
   if ! command -v mysql_config >/dev/null; then die 1 "Command 'mysql_config' is not executable"
@@ -116,6 +116,11 @@ action() {
   if ! command -v "pip3" >/dev/null; then die 1 "Command 'pip3' is not executable" ; fi
 
 	pip3 install -r /usr/src/lets/requirements.txt && edebug "pip3 returned true for /usr/src/lets/requirements.txt" || die "pip3 failed to fetch required packages"
+
+	git submodule init /usr/src/lets || die 1 "Unable to init submodules in /usr/src/lets"
+	git submodule update /usr/src/lets || die 1 "Unable to update submodules in /usr/src/lets"
+
+	die 0 "yay"
 }
 
 # LOGIC
