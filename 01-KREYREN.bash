@@ -39,6 +39,9 @@
 # Sanitization for API used
 # [ -e "/tmp/00-ripple-api.bash" ] && (source "/tmp/00-ripple-api.bash" || die 1 "Unable to fetch ripple API") || warn "Unable to source ripple-api, trying to fetch" && (wget "https://raw.githubusercontent.com/Kreyren/Ripple-Auto-Installer/kreyrenizing/00-ripple-api.bash" -O "/tmp/00-ripple-api.bash" || die 1 "Unable to fetch ripple-api") && (source "/tmp/00-ripple-api.bash" && einfo "ripple-api was fetched and sourced" || die 1 "Failed to source ripple-api")
 
+# Variables
+maintainer="github.com/kreyren/Ripple-Auto-Installer"
+
 # Error handling
 if ! command -v "einfo" > /dev/null; then	einfo()	{	printf "INFO: %s\n" "$1"	1>&2	;	} fi
 if ! command -v "warn" > /dev/null; then	warn()	{	printf "WARN: %s\n" "$1"	1>&2	;	} fi
@@ -94,6 +97,8 @@ checkroot() { # Check if executed as root, if not tries to use sudo if KREYREN v
 }
 
 action() {
+	warn "THIS SCRIPT IS WORK IN PROGRESS!!\nif script ends with fatal report issue to $maintainer/issues and wait for commit."
+
   # Fetch repositories
   [ ! -e "/usr/src/lets" ] && (git clone https://zxq.co/ripple/lets.git /usr/src/lets || die 1 "Unable to fetch ripple/lets") || edebug "Directory /usr/src/lets alredy exists"
   [ ! -e "/usr/src/hanayo" ] && (git clone https://zxq.co/ripple/hanayo.git /usr/src/hanayo || die 1 "Unable to fetch ripple/hanayo") || edebug "Directory /usr/src/hanayo alredy exists"
