@@ -22,12 +22,14 @@ read domain
 if [ -z "$domain" ]; then
 	printf "\n\nYou need to specify the main domain. Example: cookiezi.pw"
 else
-	printf "\n\nFrontend: $domain"
-	printf "\nBancho: c.$domain"
-	printf "\nAvatar: a.$domain"
-	printf "\nBackend: old.$domain"
-	printf "\n\nIs this configuration correct? [y/n]: "
-	read q
+	printf '%s\n' \
+"Frontend: $domain" \
+"Bancho: c.$domain" \
+"Avatar: a.$domain" \
+"Backend: old.$domain" \
+"" \
+"Is this configuration correct? [y/n]: "
+	read qclear
 	if [ "$q" = "y" ]; then
 		valid_domain=1
 	fi
