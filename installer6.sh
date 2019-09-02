@@ -1,5 +1,4 @@
 #!/bin/sh
-clear
 printf "This script has to run in sudo mode.\nIf this isn't the case CTRL+C now.\nAlso please don't install this in /root/ but whatever I installed it but I don't really care anyway.\nThis is also meant to be used on a fresh Ubuntu 16.04 install but you can use other OS anyway because this creates a new database etc.\nThis installer is simplistic as its just something I put together so I could easily recreate the server once things change or when I move server around for testing etc.\n\t- Aoba\n"
 
 valid_domain=0
@@ -63,7 +62,7 @@ printf "\n\nAlright! Let's see what I can do here...\n\n"
 START=$(date +%s)
 
 echo "Installing dependencies..."
-sudo apt-get install build-essential autoconf libtool pkg-config python-opengl python-imaging python-pyrex python-pyside.qtopengl idle-python2.7 qt4-dev-tools qt4-designer libqtgui4 libqtcore4 libqt4-xml libqt4-test libqt4-script libqt4-network libqt4-dbus python-qt4 python-qt4-gl libgle3 python-dev -y	 
+sudo apt-get install build-essential autoconf libtool pkg-config python-opengl python-imaging python-pyrex python-pyside.qtopengl idle-python2.7 qt4-dev-tools qt4-designer libqtgui4 libqtcore4 libqt4-xml libqt4-test libqt4-script libqt4-network libqt4-dbus python-qt4 python-qt4-gl libgle3 python-dev -y
 sudo add-apt-repository ppa:deadsnakes/ppa -y
 sudo apt-get update
 apt-get install python3.6 python3.6-dev -y
@@ -174,7 +173,7 @@ systemctl restart php7.2-fpm
 pkill -f nginx
 cd /etc/nginx/
 rm -rf nginx.conf
-wget -O nginx.conf https://pastebin.com/raw/9aduuq4e 
+wget -O nginx.conf https://pastebin.com/raw/9aduuq4e
 sed -i 's#include /root/ripple/nginx/*.conf\*#include '$MasterDir'/nginx/*.conf#' /etc/nginx/nginx.conf
 cd $MasterDir
 cd nginx
