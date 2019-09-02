@@ -7,7 +7,7 @@ printf '%s\n' \
 "This installer is simplistic as its just something I put together so I could easily recreate the server once things change or when I move server around for testing etc." \
 "- Aoba"
 
-valid_domain=0
+unset valid_domain
 
 printf "\nInstall directory "[$(pwd)"/ripple"]": "
 read MasterDir
