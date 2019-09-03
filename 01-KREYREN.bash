@@ -121,9 +121,9 @@ configure_hanayo() {
 	if ! command -v "go" >/dev/null; then die 1 "Command 'go' is not executable" ; fi
 	# KREYRENIZE: golang-go on debian
 	# Fetch
-	[ ! -e "${GOPATH}/hanayo" ] && (go get -u 'zxq.co/ripple/hanayo' || die 1 "Unable to get hanayo using go") || einfo "hanayo is already fetched"
+	[ ! -e "${GOPATH}/src/zxq.co/ripple/hanayo" ] && (go get -u 'zxq.co/ripple/hanayo' || die 1 "Unable to get hanayo using go") || einfo "hanayo is already fetched"
 
-	go build "${srcdir}/hanayo/src/"
+	(cd "${GOPATH}/src/zxq.co/ripple/hanayo" ; go build "${srcdir}/go/src/zxq.co/ripple/hanayo"
 
 	die 0
 }
@@ -187,6 +187,11 @@ checkroot "$@" && while [[ "$#" -ge '0' ]]; do case "$1" in
 		#configure_avatarservergo
 		#configure_pep_py
 		configure_hanayo
+	;;
+	--uniminin)
+		[ -z "$directory" ] && export directory=""
+		[ -z "$srcdir" ] && export srcdir="$(pwd)"
+		configure_lets
 	;;
 	"") die 1 "Not Finished" ;;
 	*) die 2 "Argument '$1' is not recognized by ${FUNCNAME[0]}"; break
