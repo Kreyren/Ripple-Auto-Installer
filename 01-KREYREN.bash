@@ -129,9 +129,12 @@ configure_hanayo() {
 }
 
 configure_rippleapi() {
+	if ! command -v "go" >/dev/null; then die 1 "Command 'go' is not executable" ; fi
+	# KREYRENIZE: golang-go on debian
 	# Fetch
-	[ ! -e "${srcdir}/rippleapi" ] && (git clone 'https://zxq.co/ripple/rippleapi.git' "${srcdir}/rippleapi" || die 1 "Unable to fetch ripple/rippleapi") || edebug "Directory $srcdir/rippleapi alredy exists"
-	# TODO: use github mirror for SSH https://github.com/osuripple/api
+	[ ! -e "${GOPATH}/src/zxq.co/ripple/rippleapi" ] && (go get -u 'zxq.co/ripple/rippleapi' || die 1 "Unable to get rippleapi using go") || einfo "rippleapi is already fetched"
+
+	[ ! -e "${GOPATH}/src/zxq.co/ripple/rippleapi/rippleapi" ] && (go build -o "${GOPATH}/src/zxq.co/ripple/rippleapi/rippleapi" "${GOPATH}/src/zxq.co/ripple/rippleapi/" || die 1 "Unable to build rippleapi in ${GOPATH}/src/zxq.co/ripple/rippleapi/rippleapi") || einfo "rippleapi is already compiled"
 
 	die 0
 }
@@ -182,11 +185,11 @@ checkroot "$@" && while [[ "$#" -ge '0' ]]; do case "$1" in
 		[ -z "$directory" ] && export directory=""
 		[ -z "$srcdir" ] && export srcdir="/usr/src/"
 		export GOPATH="${srcdir}/go"
-		#configure_rippleapi
+		configure_rippleapi
 		#configure_lets
 		#configure_avatarservergo
 		#configure_pep_py
-		configure_hanayo
+		#configure_hanayo
 	;;
 	--uniminin)
 		[ -z "$directory" ] && export directory=""
