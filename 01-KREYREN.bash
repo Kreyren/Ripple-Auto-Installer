@@ -140,8 +140,12 @@ configure_rippleapi() {
 }
 
 configure_avatarservergo() {
-	# fetch
-	[ -e "${srcdir}/avatar-server-go" ] && (git clone 'https://zxq.co/Sunpy/avatar-server-go.git' "${srcdir}/avatar-server-go" || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory $srcdir/lets alredy exists"
+	if ! command -v "go" >/dev/null; then die 1 "Command 'go' is not executable" ; fi
+	# KREYRENIZE: golang-go on debian
+	# Fetch
+	[ ! -e "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go" ] && (go get -u 'zxq.co/Sunpy/avatar-server-go' || die 1 "Unable to get avatar-server-go using go") || einfo "avatar-server-go is already fetched"
+
+	[ ! -e "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" ] && (go build -o "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/" || die 1 "Unable to build avatar-server-go in ${GOPATH}/src/zxq.co/Sunpy/avatar-server-go") || einfo "avatar-server-go is already compiled"
 
 	die 0
 }
@@ -185,9 +189,9 @@ checkroot "$@" && while [[ "$#" -ge '0' ]]; do case "$1" in
 		[ -z "$directory" ] && export directory=""
 		[ -z "$srcdir" ] && export srcdir="/usr/src/"
 		export GOPATH="${srcdir}/go"
-		configure_rippleapi
+		#configure_rippleapi
 		#configure_lets
-		#configure_avatarservergo
+		configure_avatarservergo
 		#configure_pep_py
 		#configure_hanayo
 	;;
