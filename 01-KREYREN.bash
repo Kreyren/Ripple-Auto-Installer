@@ -21,7 +21,7 @@
 ###X lets (https://zxq.co/ripple/lets)
 ###X hanayo (https://zxq.co/ripple/hanayo)
 ###X rippleapi (https://zxq.co/ripple/rippleapi)
-### cheesegull (https://zxq.co/ripple/cheesegull) -> Removed based on uniminin
+###X cheesegull (https://zxq.co/ripple/cheesegull) -> Removed based on uniminin
 ###X avatarserver (https://zxq.co/Sunpy/avatar-server-go)
 ###X pyp.pi (https://zxq.co/ripple/pep.py)
 ## Configure everything (mysql pep.py lets avatar-server rippleapi hanayo nginx)
@@ -97,38 +97,72 @@ checkroot() { # Check if executed as root, if not tries to use sudo if KREYREN v
 	fi
 }
 
-action() {
-	warn "THIS SCRIPT IS WORK IN PROGRESS!!\nif script ends with fatal report issue to $maintainer/issues and wait for commit."
+configure_lets() {
+	# Fetch
+	[ ! -e "${srcdir}/lets" ] && (git clone 'https://zxq.co/ripple/lets.git' "${srcdir}/lets" || die 1 "Unable to fetch ripple/lets") || edebug "Directory $srcdir/lets alredy exists"
 
-  # Fetch repositories
-  [ ! -e "/usr/src/lets" ] && (git clone https://zxq.co/ripple/lets.git /usr/src/lets || die 1 "Unable to fetch ripple/lets") || edebug "Directory /usr/src/lets alredy exists"
-  [ ! -e "/usr/src/hanayo" ] && (git clone https://zxq.co/ripple/hanayo.git /usr/src/hanayo || die 1 "Unable to fetch ripple/hanayo") || edebug "Directory /usr/src/hanayo alredy exists"
-  [ ! -e "/usr/src/rippleapi" ] && (git clone https://zxq.co/ripple/rippleapi.git /usr/src/rippleapi || die 1 "Unable to fetch ripple/rippleapi") || edebug "Directory /usr/src/rippleapi alredy exists"
-  [ ! -e "/usr/src/avatar-server-go" ] && (git clone https://zxq.co/Sunpy/avatar-server-go.git /usr/src/avatar-server-go || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory /usr/src/lets alredy exists"
-  #[ ! -e "/usr/src/pep.py" ] && (git clone https://zxq.co/ripple/pep.py.git /usr/src/pep.py || die 1 "Unable to fetch Sunpy/pep.py") || edebug "Directory /usr/src/lets alredy exists"
-
-  # Required for lets
-  if ! command -v mysql_config >/dev/null; then die 1 "Command 'mysql_config' is not executable"
-	#TODO: elif grep -qF "Debian" "/etc/os-release" && [ -n "$KREYREN" ]; then	einfo "This package depends on mysql_config from libmariadb-dev-compat on Debian which will be installed now" ; apt install libmariadb-dev-compat -y
-	fi
+	# Dependencies
+	## TODO: Kreyrenize
+	if ! command -v mysql_config >/dev/null; then die 1 "Command 'mysql_config' is not executable" ; fi
 
 	# TODO: Sanitization on required deps
 	# TODO: pip can also be used
   if ! command -v "pip3" >/dev/null; then die 1 "Command 'pip3' is not executable" ; fi
 
-	pip3 install -r /usr/src/lets/requirements.txt && edebug "pip3 returned true for /usr/src/lets/requirements.txt" || die "pip3 failed to fetch required packages"
+	pip3 install -r "${srcdir}/lets/requirements.txt" && edebug "pip3 returned true for $srcdir/lets/requirements.txt" || die "pip3 failed to fetch required packages"
 
-	git submodule init /usr/src/lets || die 1 "Unable to init submodules in /usr/src/lets"
-	git submodule update /usr/src/lets || die 1 "Unable to update submodules in /usr/src/lets"
+	git submodule init "${srcdir}/lets" || die 1 "Unable to init submodules in $srcdir/lets"
+	git submodule update "${srcdir}/lets" || die 1 "Unable to update submodules in $srcdir/lets"
 
-	die 0 "yay"
+	die 0
+}
+
+configure_hanayo() {
+	# Fetch
+	[ ! -e "${srcdir}/hanayo" ] && (git clone 'https://zxq.co/ripple/hanayo.git' "${srcdir}/hanayo" || die 1 "Unable to fetch ripple/hanayo") || edebug "Directory $srcdir/hanayo alredy exists"
+}
+
+configure_rippleapi() {
+	# Fetch
+	[ ! -e "${srcdir}/rippleapi" ] && (git clone 'https://zxq.co/ripple/rippleapi.git' "${srcdir}/rippleapi" || die 1 "Unable to fetch ripple/rippleapi") || edebug "Directory $srcdir/rippleapi alredy exists"
+}
+
+configure_avatarservergo() {
+	# fetch
+	[ ! -e "${srcdir}/avatar-server-go" ] && (git clone 'https://zxq.co/Sunpy/avatar-server-go.git' "${srcdir}/avatar-server-go" || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory $srcdir/lets alredy exists"
+}
+
+configure_pep_py() {
+	# Fetch
+	[ ! -e "${srcdir}/pep.py" ] && (git clone 'https://zxq.co/ripple/pep.py.git' "${srcdir}/pep.py" || die 1 "Unable to fetch Sunpy/pep.py") || edebug "Directory $srcdir/lets alredy exists"
 }
 
 # LOGIC
 
-checkroot "$@" && while [[ "$#" -ge 0 ]]; do case "$1" in
+checkroot "$@" && while [[ "$#" -ge '0' ]]; do case "$1" in
+	-C|--directory)
+		[[ "$2" != -* ]] && die 2 "Argument --directory doesn't expect two variables"
+		[ -z "$1" ] && die 2 "Argument --directory expects one value pointing to directory used"
+		[ ! -d "$1" ] && die 2 "Argument --directory doesn't recognize '$1' as valid directory"
+		export directory="$1" ;	shift 2
+	;;
+	--srcdir)
+		[[ "$2" != -* ]] && die 2 "Argument --srcdir doesn't expect two variables"
+		[ -z "$1" ] && die 2 "Argument --srcdir expects one value pointing to directory used for source files"
+		[ ! -d "$1" ] && die 2 "Argument --srcdir doesn't recognize '$1' as valid directory"
+		export srcdir="$1" ; shift 2
+	;;
 	-h|-\?|--help) printf "STUB: HELP_PAGE" && break ;; # TODO: Sanitize on variables
 	-d|--debug) export debug="true" ; shift 1 ;; # TODO: Sanitize on variables
-	"") action ;;
-	*) die 2 ; break
+	--test) # STUB
+		[ -z "$directory" ] && export directory=""
+		[ -z "$srcdir" ] && export srcdir="/usr/src/"
+		configure_rippleapi
+		configure_lets
+		configure_avatarservergo
+		configure_pep_py
+		configure_hanayo
+	;;
+	"") die 1 "Not Finished" ;;
+	*) die 2 "Argument '$1' is not recognized by ${FUNCNAME[0]}"; break
 esac; done
