@@ -114,7 +114,7 @@ configure_lets() {
 
 	[ -e "${srcdir}/lets/requirements.txt" ] && (pip3 install -r "${srcdir}/lets/requirements.txt" && edebug "pip3 returned true for $srcdir/lets/requirements.txt" || die "pip3 failed to fetch required packages") || die 1 "File ${srcdir}/lets/requirements.txt doesn't exists"
 
-	die 0
+	return 0
 }
 
 configure_hanayo() {
@@ -123,17 +123,23 @@ configure_hanayo() {
 	# TODO: use github mirror for SSH git@github.com:osuripple/hanayo.git
 
 	# TODO: instructions?
+
+	return 0
 }
 
 configure_rippleapi() {
 	# Fetch
 	[ ! -e "${srcdir}/rippleapi" ] && (git clone 'https://zxq.co/ripple/rippleapi.git' "${srcdir}/rippleapi" || die 1 "Unable to fetch ripple/rippleapi") || edebug "Directory $srcdir/rippleapi alredy exists"
 	# TODO: use github mirror for SSH https://github.com/osuripple/api
+
+	return 0
 }
 
 configure_avatarservergo() {
 	# fetch
 	[ -e "${srcdir}/avatar-server-go" ] && (git clone 'https://zxq.co/Sunpy/avatar-server-go.git' "${srcdir}/avatar-server-go" || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory $srcdir/lets alredy exists"
+
+	return 0
 }
 
 configure_pep_py() {
@@ -141,10 +147,17 @@ configure_pep_py() {
 	[ ! -e "${srcdir}/pep.py" ] && (git clone 'https://zxq.co/ripple/pep.py.git' "${srcdir}/pep.py" || die 1 "Unable to fetch Sunpy/pep.py") || edebug "Directory $srcdir/lets alredy exists"
 
 	# Configure
-	git submodule init "${srcdir}/pep.py" || die 1 "Unable to init submodules in $srcdir/pep.py"
-	git submodule update "${srcdir}/pep.py" || die 1 "Unable to update submodules in $srcdir/pep.py"
+	## TODO: doesn't switch directory correctly
+	git submodule init "${srcdir}/pep.py/" || die 1 "Unable to init submodules in $srcdir/pep.py"
+	git submodule update "${srcdir}/pep.py/" || die 1 "Unable to update submodules in $srcdir/pep.py"
 
 	[ -e "${srcdir}/pep.py/requirements.txt" ] && (pip3 install -r "${srcdir}/pep.py/requirements.txt" && edebug "pip3 returned true for $srcdir/lets/requirements.txt" || die "pip3 failed to fetch required packages") || die 1 "File ${srcdir}/pep.py/requirements.txt does not exists"
+
+	return 0
+}
+
+configure_nginx() {
+	return 0
 }
 
 # LOGIC
@@ -169,9 +182,9 @@ checkroot "$@" && while [[ "$#" -ge '0' ]]; do case "$1" in
 		[ -z "$directory" ] && export directory=""
 		[ -z "$srcdir" ] && export srcdir="/usr/src/"
 		#configure_rippleapi
-		configure_lets
+		#configure_lets
 		#configure_avatarservergo
-		#configure_pep_py
+		configure_pep_py
 		#configure_hanayo
 	;;
 	"") die 1 "Not Finished" ;;
