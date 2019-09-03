@@ -114,7 +114,7 @@ configure_lets() {
 
 	[ -e "${srcdir}/lets/requirements.txt" ] && (pip3 install -r "${srcdir}/lets/requirements.txt" && edebug "pip3 returned true for $srcdir/lets/requirements.txt" || die "pip3 failed to fetch required packages") || die 1 "File ${srcdir}/lets/requirements.txt doesn't exists"
 
-	return 0
+	die 0
 }
 
 configure_hanayo() {
@@ -123,9 +123,7 @@ configure_hanayo() {
 	# Fetch
 	[ ! -e "${GOPATH}/src/zxq.co/ripple/hanayo" ] && (go get -u 'zxq.co/ripple/hanayo' || die 1 "Unable to get hanayo using go") || einfo "hanayo is already fetched"
 
-	# HOTFIX:
-	#(cd "${GOPATH}/src/zxq.co/ripple/hanayo" && go build .)
-	go build "${GOPATH}/src/zxq.co/ripple/hanayo"
+	[ ! -e "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo" ] && (go build -o "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo" "${GOPATH}/src/zxq.co/ripple/hanayo/" || die 1 "Unable to build hanayo in ${GOPATH}/src/zxq.co/ripple/hanayo/hanayo") || einfo "Hanayo is already compiled"
 
 	die 0
 }
