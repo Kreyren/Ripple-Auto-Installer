@@ -35,6 +35,11 @@
 #### pip install -r requirements.txt
 ##### pip reguired (DEBIAN: python3-pip)
 
+## Add ruri https://github.com/rumoi/ruri (replacement for pep.py)
+### Fast, but bad code quality
+## Add Sora https://github.com/Mempler/Sora (replacement for pep.py)
+## Add https://github.com/tojiru/scarlet (replacement for pep.py)
+
 # GLOBAL
 
 # Sanitization for API used
@@ -116,7 +121,15 @@ configure_lets() {
 
 	[ -e "${srcdir}/lets/requirements.txt" ] && (pip3 install -r "${srcdir}/lets/requirements.txt" && edebug "pip3 returned true for $srcdir/lets/requirements.txt" || die "pip3 failed to fetch required packages") || die 1 "File ${srcdir}/lets/requirements.txt doesn't exists"
 
-	die 0
+	# Compile
+	if [ ! -e "${srcdir}/lets/build/" ]; then (cd "${srcdir}/lets" && python3 "${srcdir}/lets/setup.py" build_ext --inplace  || die 1 "python failed for lets")
+elif [ -e "${srcdir}/lets/build/" ]; then einfo "lets is already compiled"
+	fi
+
+}
+
+myip() {
+	if command -v "curl" >/dev/null; then curl ifconfig.me 2>/dev/null; fi
 }
 
 configure_hanayo() {
@@ -132,7 +145,55 @@ elif [ -e "${GOPATH}/src/zxq.co/ripple/hanayo" ]; then einfo "hanayo is already 
 elif [ -e "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo" ]; then einfo "Hanayo is already compiled"
 	fi
 
-	die 0
+	# Config
+	# TODO: Fetch IP from resolv.conf
+	printf '%s/n' \
+		'; ip:port from which to take requests.' \
+		"ListenTo=$(myip)" \ # HOTFIX
+		'; Whether ListenTo is an unix socket.' \
+		[ "$(uname)" = "Linux" ] && printf '%s' "\'Unix=true\'" || printf '%s' "\'Unix=false\'"  \
+		'; MySQL server DSN' \
+		'DSN='1.1.1.1'' \ # HOTFIX
+		'RedisEnable=false' \
+		'AvatarURL=' \
+		'BaseURL=' \
+		'API=' \
+		'BanchoAPI=' \
+		'CheesegullAPI=' \
+		'APISecret=' \
+		'; If this is true, files will be served from the local server instead of the CDN.' \
+		'Offline=false' \
+		'; Folder where all the non-go projects are contained, such as old-frontend, lets, ci-system. Used for changelog.' \
+		'MainRippleFolder=' \
+		'; location folder of avatars, used for placing the avatars from the avatar change page.' \
+		'AvatarsFolder=' \
+		'CookieSecret=' \
+		'RedisMaxConnections=0' \
+		'RedisNetwork=' \
+		'RedisAddress=' \
+		'RedisPassword=' \
+		'DiscordServer=' \
+		'BaseAPIPublic=' \
+		'; This is a fake configuration value. All of the following from now on should only really be set in a production environment.' \
+		'Production=0' \
+		'MailgunDomain=' \
+		'MailgunPrivateAPIKey=' \
+		'MailgunPublicAPIKey=' \
+		'MailgunFrom=' \
+		'RecaptchaSite=' \
+		'RecaptchaPrivate=' \
+		'DiscordOAuthID=' \
+		'DiscordOAuthSecret=' \
+		'DonorBotURL=' \
+		'DonorBotSecret=' \
+		'CoinbaseAPIKey=' \
+		'CoinbaseAPISecret=' \
+		'SentryDSN=' \
+		'IP_API=' \
+	> "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo.conf"
+
+	warn "Please configure ${GOPATH}/src/zxq.co/ripple/hanayo/hanayo.conf manually"
+
 }
 
 configure_rippleapi() {
@@ -148,7 +209,6 @@ configure_rippleapi() {
 	elif [ -e "${GOPATH}/src/zxq.co/ripple/rippleapi/rippleapi" ]; then einfo "rippleapi is already compiled"
 	fi
 
-	die 0
 }
 
 configure_avatarservergo() {
@@ -164,14 +224,12 @@ configure_avatarservergo() {
 	if [ ! -e "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" ]; then go build -o "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/" || die 1 "Unable to build avatar-server-go in ${GOPATH}/src/zxq.co/Sunpy/avatar-server-go"
 	elif [ -e "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" ]; then einfo "avatar-server-go is already compiled"
 	fi
-
-	die 0
 }
 
 configure_pep_py() {
 	# Fetch - pep.py
 	if [ ! -e "${srcdir}/pep.py" ]; then git clone 'https://zxq.co/ripple/pep.py.git' "${srcdir}/pep.py" || die 1 "Unable to fetch Sunpy/pep.py"
-	elif [ -e "${srcdir}/pep.py" ]; then edebug "Directory $srcdir/lets alredy exists"
+elif [ -e "${srcdir}/pep.py" ]; then edebug "Directory $srcdir/pep.py alredy exists"
 	fi
 
 	# Fetch deps
@@ -193,11 +251,37 @@ configure_pep_py() {
 	fi
 
 	# TODO: Sanitization for python required
-
-	die 0
 }
 
 configure_nginx() {
+	die 0
+}
+
+
+configure_ruri() {
+	# Fetch
+	if [ ! -e "${srcdir}/ruri" ]; then git clone 'https://github.com/rumoi/ruri.git' "${srcdir}/ruri" || die 1 "Unable to fetch rumoi/ruri"
+	elif [ -e "${srcdir}/ruri" ]; then edebug "Directory $srcdir/ruri alredy exists"
+	fi
+
+	die 1 "Waiting for makefile (https://github.com/rumoi/ruri/issues/9)"
+
+}
+
+configure_sora() {
+	if [ ! -e "${srcdir}/Sora" ]; then git clone 'https://github.com/Mempler/Sora' "${srcdir}/Sora" || die 1 "Unable to fetch rumoi/ruri"
+elif [ -e "${srcdir}/Sora" ]; then edebug "Directory $srcdir/Sora alredy exists"
+	fi
+
+
+
+}
+
+configure_mysql() {
+	if ! command -v "mysql_config" >/dev/null; then die 1 "Command 'myshql_config' is not executable" ; fi
+
+
+
 	die 0
 }
 
@@ -225,8 +309,11 @@ checkroot "$@" && while [[ "$#" -ge '0' ]]; do case "$1" in
 		#configure_rippleapi
 		#configure_lets
 		#configure_avatarservergo
-		configure_pep_py
-		#configure_hanayo
+		#configure_pep_py
+		configure_hanayo
+		#configure_ruri
+		#configure_sorano config.i
+		die 0
 	;;
 	--uniminin)
 		[ -z "$directory" ] && export directory=""
