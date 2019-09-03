@@ -46,7 +46,8 @@
 # [ -e "/tmp/00-ripple-api.bash" ] && (source "/tmp/00-ripple-api.bash" || die 1 "Unable to fetch ripple API") || warn "Unable to source ripple-api, trying to fetch" && (wget "https://raw.githubusercontent.com/Kreyren/Ripple-Auto-Installer/kreyrenizing/00-ripple-api.bash" -O "/tmp/00-ripple-api.bash" || die 1 "Unable to fetch ripple-api") && (source "/tmp/00-ripple-api.bash" && einfo "ripple-api was fetched and sourced" || die 1 "Failed to source ripple-api")
 
 # Variables
-maintainer="github.com/kreyren/Ripple-Auto-Installer"
+export maintainer="github.com/kreyren/Ripple-Auto-Installer"
+export GOPATH="${srcdir}/go"
 
 # Error handling
 if ! command -v "einfo" > /dev/null; then	einfo()	{	printf "INFO: %s\n" "$1"	1>&2	;	} fi
@@ -126,10 +127,15 @@ configure_lets() {
 elif [ -e "${srcdir}/lets/build/" ]; then einfo "lets is already compiled"
 	fi
 
+	die 0
 }
 
-myip() {
-	if command -v "curl" >/dev/null; then curl ifconfig.me 2>/dev/null; fi
+myip() { # Helper to fetch IP
+	# Fetch IP from hostname
+	if command -v "hostname" >/dev/null; then hostname -I 2>/dev/null && return 0; fi
+
+	# Fetch IP from remote server
+	if command -v "curl" >/dev/null; then curl ifconfig.me 2>/dev/null && return 0; fi
 }
 
 configure_hanayo() {
@@ -147,52 +153,54 @@ elif [ -e "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo" ]; then einfo "Hanayo is a
 
 	# Config
 	# TODO: Fetch IP from resolv.conf
-	printf '%s/n' \
+	[ ! -e "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo.conf" ] && printf '%s/n' \
 		'; ip:port from which to take requests.' \
-		"ListenTo=$(myip)" \ # HOTFIX
+		"ListenTo=':45221'" \
 		'; Whether ListenTo is an unix socket.' \
 		[ "$(uname)" = "Linux" ] && printf '%s' "\'Unix=true\'" || printf '%s' "\'Unix=false\'"  \
 		'; MySQL server DSN' \
-		'DSN='1.1.1.1'' \ # HOTFIX
-		'RedisEnable=false' \
-		'AvatarURL=' \
-		'BaseURL=' \
-		'API=' \
-		'BanchoAPI=' \
-		'CheesegullAPI=' \
-		'APISecret=' \
+		'DSN='1.1.1.1'' \
+		'RedisEnable='false'' \
+		'AvatarURL='https://a.ripple.moe'' \
+		'BaseURL='https://ripple.moe'' \
+		'API='http://localhost:40001/api/v1/'' \
+		'BanchoAPI='https://c.ripple.moe'' \
+		'CheesegullAPI='https://storage.ripple.moe/api'' \
+		'APISecret='Potato'' \
 		'; If this is true, files will be served from the local server instead of the CDN.' \
-		'Offline=false' \
+		'Offline='false'' \
 		'; Folder where all the non-go projects are contained, such as old-frontend, lets, ci-system. Used for changelog.' \
-		'MainRippleFolder=' \
+		"MainRippleFolder='${srcdir}/Ripple'" \
 		'; location folder of avatars, used for placing the avatars from the avatar change page.' \
 		'AvatarsFolder=' \
 		'CookieSecret=' \
-		'RedisMaxConnections=0' \
+		'RedisMaxConnections='0'' \
 		'RedisNetwork=' \
 		'RedisAddress=' \
 		'RedisPassword=' \
-		'DiscordServer=' \
+		'DiscordServer='https://discord.gg/sBxy77'' \
 		'BaseAPIPublic=' \
 		'; This is a fake configuration value. All of the following from now on should only really be set in a production environment.' \
 		'Production=0' \
 		'MailgunDomain=' \
 		'MailgunPrivateAPIKey=' \
 		'MailgunPublicAPIKey=' \
-		'MailgunFrom=' \
+		'MailgunFrom='"Ripple" <noreply@ripple.moe>'' \
 		'RecaptchaSite=' \
 		'RecaptchaPrivate=' \
 		'DiscordOAuthID=' \
 		'DiscordOAuthSecret=' \
-		'DonorBotURL=' \
+		'DonorBotURL='https://donatebot.io/checkout/481111107394732043'' \
 		'DonorBotSecret=' \
 		'CoinbaseAPIKey=' \
 		'CoinbaseAPISecret=' \
 		'SentryDSN=' \
-		'IP_API=' \
+		'IP_API='https://ip.zxq.co'' \
 	> "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo.conf"
 
 	warn "Please configure ${GOPATH}/src/zxq.co/ripple/hanayo/hanayo.conf manually"
+
+	die 0
 
 }
 
@@ -209,6 +217,7 @@ configure_rippleapi() {
 	elif [ -e "${GOPATH}/src/zxq.co/ripple/rippleapi/rippleapi" ]; then einfo "rippleapi is already compiled"
 	fi
 
+	die 0
 }
 
 configure_avatarservergo() {
@@ -224,6 +233,8 @@ configure_avatarservergo() {
 	if [ ! -e "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" ]; then go build -o "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/" || die 1 "Unable to build avatar-server-go in ${GOPATH}/src/zxq.co/Sunpy/avatar-server-go"
 	elif [ -e "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" ]; then einfo "avatar-server-go is already compiled"
 	fi
+
+	die 0
 }
 
 configure_pep_py() {
@@ -251,10 +262,12 @@ elif [ -e "${srcdir}/pep.py" ]; then edebug "Directory $srcdir/pep.py alredy exi
 	fi
 
 	# TODO: Sanitization for python required
+
+	die 0
 }
 
 configure_nginx() {
-	die 0
+	die 1
 }
 
 
@@ -273,16 +286,14 @@ configure_sora() {
 elif [ -e "${srcdir}/Sora" ]; then edebug "Directory $srcdir/Sora alredy exists"
 	fi
 
-
+	die 1 "Sora configuration is not finished"
 
 }
 
 configure_mysql() {
 	if ! command -v "mysql_config" >/dev/null; then die 1 "Command 'myshql_config' is not executable" ; fi
 
-
-
-	die 0
+	die 0 "Mysql configuration is not finished"
 }
 
 # LOGIC
@@ -305,7 +316,6 @@ checkroot "$@" && while [[ "$#" -ge '0' ]]; do case "$1" in
 	--test) # STUB
 		[ -z "$directory" ] && export directory=""
 		[ -z "$srcdir" ] && export srcdir="/usr/src/"
-		export GOPATH="${srcdir}/go"
 		#configure_rippleapi
 		#configure_lets
 		#configure_avatarservergo
@@ -313,6 +323,16 @@ checkroot "$@" && while [[ "$#" -ge '0' ]]; do case "$1" in
 		configure_hanayo
 		#configure_ruri
 		#configure_sorano config.i
+		die 0
+	;;
+	--base) # STUB
+		[ -z "$directory" ] && export directory=""
+		[ -z "$srcdir" ] && export srcdir="/usr/src/"
+		configure_rippleapi
+		configure_lets
+		configure_avatarservergo
+		configure_pep_py
+		configure_hanayo
 		die 0
 	;;
 	--uniminin)
