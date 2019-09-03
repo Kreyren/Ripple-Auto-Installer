@@ -123,7 +123,9 @@ configure_hanayo() {
 	# Fetch
 	[ ! -e "${GOPATH}/src/zxq.co/ripple/hanayo" ] && (go get -u 'zxq.co/ripple/hanayo' || die 1 "Unable to get hanayo using go") || einfo "hanayo is already fetched"
 
-	(cd "${GOPATH}/src/zxq.co/ripple/hanayo" ; go build "${srcdir}/go/src/zxq.co/ripple/hanayo"
+	# HOTFIX:
+	#(cd "${GOPATH}/src/zxq.co/ripple/hanayo" && go build .)
+	go build "${GOPATH}/src/zxq.co/ripple/hanayo"
 
 	die 0
 }
