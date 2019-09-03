@@ -118,13 +118,14 @@ configure_lets() {
 }
 
 configure_hanayo() {
+	if ! command -v "go" >/dev/null; then die 1 "Command 'go' is not executable" ; fi
+	# KREYRENIZE: golang-go on debian
 	# Fetch
-	[ ! -e "${srcdir}/hanayo" ] && (git clone 'https://zxq.co/ripple/hanayo.git' "${srcdir}/hanayo" || die 1 "Unable to fetch ripple/hanayo") || edebug "Directory $srcdir/hanayo alredy exists"
-	# TODO: use github mirror for SSH git@github.com:osuripple/hanayo.git
+	[ ! -e "${GOPATH}/hanayo" ] && (go get -u 'zxq.co/ripple/hanayo' || die 1 "Unable to get hanayo using go") || einfo "hanayo is already fetched"
 
-	# TODO: instructions?
+	go build "${srcdir}/hanayo/src/"
 
-	return 0
+	die 0
 }
 
 configure_rippleapi() {
@@ -132,14 +133,14 @@ configure_rippleapi() {
 	[ ! -e "${srcdir}/rippleapi" ] && (git clone 'https://zxq.co/ripple/rippleapi.git' "${srcdir}/rippleapi" || die 1 "Unable to fetch ripple/rippleapi") || edebug "Directory $srcdir/rippleapi alredy exists"
 	# TODO: use github mirror for SSH https://github.com/osuripple/api
 
-	return 0
+	die 0
 }
 
 configure_avatarservergo() {
 	# fetch
 	[ -e "${srcdir}/avatar-server-go" ] && (git clone 'https://zxq.co/Sunpy/avatar-server-go.git' "${srcdir}/avatar-server-go" || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory $srcdir/lets alredy exists"
 
-	return 0
+	die 0
 }
 
 configure_pep_py() {
@@ -153,11 +154,11 @@ configure_pep_py() {
 
 	[ -e "${srcdir}/pep.py/requirements.txt" ] && (pip3 install -r "${srcdir}/pep.py/requirements.txt" && edebug "pip3 returned true for $srcdir/lets/requirements.txt" || die "pip3 failed to fetch required packages") || die 1 "File ${srcdir}/pep.py/requirements.txt does not exists"
 
-	return 0
+	die 0
 }
 
 configure_nginx() {
-	return 0
+	die 0
 }
 
 # LOGIC
@@ -174,18 +175,18 @@ checkroot "$@" && while [[ "$#" -ge '0' ]]; do case "$1" in
 		[ -z "$1" ] && die 2 "Argument --srcdir expects one value pointing to directory used for source files"
 		[ ! -d "$1" ] && die 2 "Argument --srcdir doesn't recognize '$1' as valid directory"
 		export srcdir="$1" ; shift 2
-
 	;;
 	-h|-\?|--help) printf "STUB: HELP_PAGE" && break ;; # TODO: Sanitize on variables
 	-d|--debug) export debug="true" ; shift 1 ;; # TODO: Sanitize on variables
 	--test) # STUB
 		[ -z "$directory" ] && export directory=""
 		[ -z "$srcdir" ] && export srcdir="/usr/src/"
+		export GOPATH="${srcdir}/go"
 		#configure_rippleapi
 		#configure_lets
 		#configure_avatarservergo
-		configure_pep_py
-		#configure_hanayo
+		#configure_pep_py
+		configure_hanayo
 	;;
 	"") die 1 "Not Finished" ;;
 	*) die 2 "Argument '$1' is not recognized by ${FUNCNAME[0]}"; break
