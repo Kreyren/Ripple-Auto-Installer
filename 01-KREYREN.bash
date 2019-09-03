@@ -99,18 +99,20 @@ checkroot() { # Check if executed as root, if not tries to use sudo if KREYREN v
 
 configure_lets() {
 	# Fetch
-	[ ! -e "${srcdir}/lets" ] && (git clone 'https://zxq.co/ripple/lets.git' "${srcdir}/lets" || die 1 "Unable to fetch ripple/lets") || edebug "Directory $srcdir/lets alredy exists"
+	if [ ! -e "${srcdir}/lets" ]; then git clone 'https://zxq.co/ripple/lets.git' "${srcdir}/lets" || die 1 "Unable to fetch ripple/lets"
+	elif [ -e "${srcdir}/lets" ]; then edebug "Directory $srcdir/lets alredy exists"
+	fi
 
 	# TODO: Sanitization on required deps
 	# TODO: pip can also be used
   if ! command -v "pip3" >/dev/null; then die 1 "Command 'pip3' is not executable" ; fi
 
-	git clone 'https://zxq.co/ripple/ripple-python-common.git' "${srcdir}/lets/common" || die 1 "Unable to clone ripple-python-common.git"
-	git clone 'https://github.com/osufx/secret' "${srcdir}/lets/secret" || die 1 "Unable to clone lets-secret"
-	git clone 'https://github.com/Francesco149/oppai-ng.git' "${srcdir}/lets/pp/oppai-ng" || die 1 "Unable to clone oppai-ng"
+	[ ! -e "${srcdir}/lets/common" ] && (git clone 'https://zxq.co/ripple/ripple-python-common.git' "${srcdir}/lets/common" || die 1 "Unable to clone ripple-python-common.git")
+	[ ! -e "${srcdir}/lets/secret" ] && (git clone 'https://github.com/osufx/secret' "${srcdir}/lets/secret" || die 1 "Unable to clone lets-secret")
+	[ ! -e "${srcdir}/lets/pp/oppai-ng" ] && (git clone 'https://github.com/Francesco149/oppai-ng.git' "${srcdir}/lets/pp/oppai-ng" || die 1 "Unable to clone oppai-ng")
 	# No access rights
 	## git clone 'git@zxq.co:ripple/maniapp-osu-tools.git' "${srcdir}/lets/calc-no-replay" || die 1 "Unable to clone maniapp-osu-tools"
-	git clone 'https://zxq.co/ripple/catch-the-pp.git' "${srcdir}/lets/pp/catch_the_pp" || die 1 "Unable to clone cat-the-pp"
+	[ ! -e "${srcdir}/lets/pp/catch_the_pp" ] && (git clone 'https://zxq.co/ripple/catch-the-pp.git' "${srcdir}/lets/pp/catch_the_pp" || die 1 "Unable to clone cat-the-pp")
 
 	[ -e "${srcdir}/lets/requirements.txt" ] && (pip3 install -r "${srcdir}/lets/requirements.txt" && edebug "pip3 returned true for $srcdir/lets/requirements.txt" || die "pip3 failed to fetch required packages") || die 1 "File ${srcdir}/lets/requirements.txt doesn't exists"
 
@@ -118,48 +120,77 @@ configure_lets() {
 }
 
 configure_hanayo() {
-	if ! command -v "go" >/dev/null; then die 1 "Command 'go' is not executable" ; fi
 	# KREYRENIZE: golang-go on debian
-	# Fetch
-	[ ! -e "${GOPATH}/src/zxq.co/ripple/hanayo" ] && (go get -u 'zxq.co/ripple/hanayo' || die 1 "Unable to get hanayo using go") || einfo "hanayo is already fetched"
+	if ! command -v "go" >/dev/null; then die 1 "Command 'go' is not executable" ; fi
 
-	[ ! -e "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo" ] && (go build -o "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo" "${GOPATH}/src/zxq.co/ripple/hanayo/" || die 1 "Unable to build hanayo in ${GOPATH}/src/zxq.co/ripple/hanayo/hanayo") || einfo "Hanayo is already compiled"
+	# Fetch
+	if [ ! -e "${GOPATH}/src/zxq.co/ripple/hanayo" ]; then  go get -u 'zxq.co/ripple/hanayo' || die 1 "Unable to get hanayo using go"
+elif [ -e "${GOPATH}/src/zxq.co/ripple/hanayo" ]; then einfo "hanayo is already fetched"
+	fi
+
+	if [ ! -e "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo" ]; then go build -o "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo" "${GOPATH}/src/zxq.co/ripple/hanayo/" || die 1 "Unable to build hanayo in ${GOPATH}/src/zxq.co/ripple/hanayo/hanayo"
+elif [ -e "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo" ]; then einfo "Hanayo is already compiled"
+	fi
 
 	die 0
 }
 
 configure_rippleapi() {
-	if ! command -v "go" >/dev/null; then die 1 "Command 'go' is not executable" ; fi
 	# KREYRENIZE: golang-go on debian
-	# Fetch
-	[ ! -e "${GOPATH}/src/zxq.co/ripple/rippleapi" ] && (go get -u 'zxq.co/ripple/rippleapi' || die 1 "Unable to get rippleapi using go") || einfo "rippleapi is already fetched"
+	if ! command -v "go" >/dev/null; then die 1 "Command 'go' is not executable" ; fi
 
-	[ ! -e "${GOPATH}/src/zxq.co/ripple/rippleapi/rippleapi" ] && (go build -o "${GOPATH}/src/zxq.co/ripple/rippleapi/rippleapi" "${GOPATH}/src/zxq.co/ripple/rippleapi/" || die 1 "Unable to build rippleapi in ${GOPATH}/src/zxq.co/ripple/rippleapi/rippleapi") || einfo "rippleapi is already compiled"
+	# Fetch
+	if [ ! -e "${GOPATH}/src/zxq.co/ripple/rippleapi" ]; then go get -u 'zxq.co/ripple/rippleapi' || die 1 "Unable to get rippleapi using go"
+	elif [ -e "${GOPATH}/src/zxq.co/ripple/rippleapi" ]; then einfo "rippleapi is already fetched"
+	fi
+
+	if [ ! -e "${GOPATH}/src/zxq.co/ripple/rippleapi/rippleapi" ]; then go build -o "${GOPATH}/src/zxq.co/ripple/rippleapi/rippleapi" "${GOPATH}/src/zxq.co/ripple/rippleapi/" || die 1 "Unable to build rippleapi in ${GOPATH}/src/zxq.co/ripple/rippleapi/rippleapi"
+	elif [ -e "${GOPATH}/src/zxq.co/ripple/rippleapi/rippleapi" ]; then einfo "rippleapi is already compiled"
+	fi
 
 	die 0
 }
 
 configure_avatarservergo() {
-	if ! command -v "go" >/dev/null; then die 1 "Command 'go' is not executable" ; fi
 	# KREYRENIZE: golang-go on debian
-	# Fetch
-	[ ! -e "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go" ] && (go get -u 'zxq.co/Sunpy/avatar-server-go' || die 1 "Unable to get avatar-server-go using go") || einfo "avatar-server-go is already fetched"
+	if ! command -v "go" >/dev/null; then die 1 "Command 'go' is not executable" ; fi
 
-	[ ! -e "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" ] && (go build -o "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/" || die 1 "Unable to build avatar-server-go in ${GOPATH}/src/zxq.co/Sunpy/avatar-server-go") || einfo "avatar-server-go is already compiled"
+	# Fetch
+	if [ ! -e "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go" ]; then go get -u 'zxq.co/Sunpy/avatar-server-go' || die 1 "Unable to get avatar-server-go using go"
+	elif [ -e "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go" ]; then einfo "avatar-server-go is already fetched"
+	fi
+
+	# Compile
+	if [ ! -e "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" ]; then go build -o "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/" || die 1 "Unable to build avatar-server-go in ${GOPATH}/src/zxq.co/Sunpy/avatar-server-go"
+	elif [ -e "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" ]; then einfo "avatar-server-go is already compiled"
+	fi
 
 	die 0
 }
 
 configure_pep_py() {
-	# Fetch
-	[ ! -e "${srcdir}/pep.py" ] && (git clone 'https://zxq.co/ripple/pep.py.git' "${srcdir}/pep.py" || die 1 "Unable to fetch Sunpy/pep.py") || edebug "Directory $srcdir/lets alredy exists"
+	# Fetch - pep.py
+	if [ ! -e "${srcdir}/pep.py" ]; then git clone 'https://zxq.co/ripple/pep.py.git' "${srcdir}/pep.py" || die 1 "Unable to fetch Sunpy/pep.py"
+	elif [ -e "${srcdir}/pep.py" ]; then edebug "Directory $srcdir/lets alredy exists"
+	fi
 
-	# Configure
-	## TODO: doesn't switch directory correctly
-	git submodule init "${srcdir}/pep.py/" || die 1 "Unable to init submodules in $srcdir/pep.py"
-	git submodule update "${srcdir}/pep.py/" || die 1 "Unable to update submodules in $srcdir/pep.py"
+	# Fetch deps
+	if [ ! -e "${srcdir}/pep.py/common" ]; then git clone 'https://zxq.co/ripple/ripple-python-common.git' "${srcdir}/pep.py/common" || die 1 "Unable to fetch Sunpy/pep.py/common from https://zxq.co/ripple/ripple-python-common.git"
+	elif [ ! -e "${srcdir}/pep.py/common" ]; then edebug "Directory $srcdir/pep.py/common alredy exists"
+	fi
 
-	[ -e "${srcdir}/pep.py/requirements.txt" ] && (pip3 install -r "${srcdir}/pep.py/requirements.txt" && edebug "pip3 returned true for $srcdir/lets/requirements.txt" || die "pip3 failed to fetch required packages") || die 1 "File ${srcdir}/pep.py/requirements.txt does not exists"
+
+	# Fetch deps for python
+	if ! command -v "pip3" >/dev/null; then die 1 "Command 'pip3' is not executable" ; fi
+
+	if [ -e "${srcdir}/pep.py/requirements.txt" ]; then (pip3 install -r "${srcdir}/pep.py/requirements.txt" && edebug "pip3 returned true for $srcdir/lets/requirements.txt" || die "pip3 failed to fetch required packages")
+	elif [ ! -e "${srcdir}/pep.py/requirements.txt" ]; then die 1 "File ${srcdir}/pep.py/requirements.txt does not exists"
+	fi
+
+	# Compile
+	if [ ! -e "${srcdir}/pep.py/build/" ]; then (cd "${srcdir}/pep.py" && python3 "${srcdir}/pep.py/setup.py" build_ext --inplace  || die 1 "python failed")
+	elif [ -e "${srcdir}/pep.py/build/" ]; then einfo "pep.py is already compiled"
+	fi
 
 	die 0
 }
@@ -191,8 +222,8 @@ checkroot "$@" && while [[ "$#" -ge '0' ]]; do case "$1" in
 		export GOPATH="${srcdir}/go"
 		#configure_rippleapi
 		#configure_lets
-		configure_avatarservergo
-		#configure_pep_py
+		#configure_avatarservergo
+		configure_pep_py
 		#configure_hanayo
 	;;
 	--uniminin)
