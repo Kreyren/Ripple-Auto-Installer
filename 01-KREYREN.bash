@@ -192,6 +192,8 @@ configure_pep_py() {
 	elif [ -e "${srcdir}/pep.py/build/" ]; then einfo "pep.py is already compiled"
 	fi
 
+	# TODO: Sanitization for python required
+
 	die 0
 }
 
