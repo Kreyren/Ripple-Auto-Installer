@@ -101,18 +101,18 @@ configure_lets() {
 	# Fetch
 	[ ! -e "${srcdir}/lets" ] && (git clone 'https://zxq.co/ripple/lets.git' "${srcdir}/lets" || die 1 "Unable to fetch ripple/lets") || edebug "Directory $srcdir/lets alredy exists"
 
-	# Dependencies
-	## TODO: Kreyrenize
-	if ! command -v mysql_config >/dev/null; then die 1 "Command 'mysql_config' is not executable" ; fi
-
 	# TODO: Sanitization on required deps
 	# TODO: pip can also be used
   if ! command -v "pip3" >/dev/null; then die 1 "Command 'pip3' is not executable" ; fi
 
-	pip3 install -r "${srcdir}/lets/requirements.txt" && edebug "pip3 returned true for $srcdir/lets/requirements.txt" || die "pip3 failed to fetch required packages"
+	git clone 'https://zxq.co/ripple/ripple-python-common.git' "${srcdir}/lets/common" || die 1 "Unable to clone ripple-python-common.git"
+	git clone 'https://github.com/osufx/secret' "${srcdir}/lets/secret" || die 1 "Unable to clone lets-secret"
+	git clone 'https://github.com/Francesco149/oppai-ng.git' "${srcdir}/lets/pp/oppai-ng" || die 1 "Unable to clone oppai-ng"
+	# No access rights
+	## git clone 'git@zxq.co:ripple/maniapp-osu-tools.git' "${srcdir}/lets/calc-no-replay" || die 1 "Unable to clone maniapp-osu-tools"
+	git clone 'https://zxq.co/ripple/catch-the-pp.git' "${srcdir}/lets/pp/catch_the_pp" || die 1 "Unable to clone cat-the-pp"
 
-	git submodule init "${srcdir}/lets" || die 1 "Unable to init submodules in $srcdir/lets"
-	git submodule update "${srcdir}/lets" || die 1 "Unable to update submodules in $srcdir/lets"
+	[ -e "${srcdir}/lets/requirements.txt" ] && (pip3 install -r "${srcdir}/lets/requirements.txt" && edebug "pip3 returned true for $srcdir/lets/requirements.txt" || die "pip3 failed to fetch required packages") || die 1 "File ${srcdir}/lets/requirements.txt doesn't exists"
 
 	die 0
 }
@@ -120,21 +120,31 @@ configure_lets() {
 configure_hanayo() {
 	# Fetch
 	[ ! -e "${srcdir}/hanayo" ] && (git clone 'https://zxq.co/ripple/hanayo.git' "${srcdir}/hanayo" || die 1 "Unable to fetch ripple/hanayo") || edebug "Directory $srcdir/hanayo alredy exists"
+	# TODO: use github mirror for SSH git@github.com:osuripple/hanayo.git
+
+	# TODO: instructions?
 }
 
 configure_rippleapi() {
 	# Fetch
 	[ ! -e "${srcdir}/rippleapi" ] && (git clone 'https://zxq.co/ripple/rippleapi.git' "${srcdir}/rippleapi" || die 1 "Unable to fetch ripple/rippleapi") || edebug "Directory $srcdir/rippleapi alredy exists"
+	# TODO: use github mirror for SSH https://github.com/osuripple/api
 }
 
 configure_avatarservergo() {
 	# fetch
-	[ ! -e "${srcdir}/avatar-server-go" ] && (git clone 'https://zxq.co/Sunpy/avatar-server-go.git' "${srcdir}/avatar-server-go" || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory $srcdir/lets alredy exists"
+	[ -e "${srcdir}/avatar-server-go" ] && (git clone 'https://zxq.co/Sunpy/avatar-server-go.git' "${srcdir}/avatar-server-go" || die 1 "Unable to fetch Sunpy/avatar-server-go") || edebug "Directory $srcdir/lets alredy exists"
 }
 
 configure_pep_py() {
 	# Fetch
 	[ ! -e "${srcdir}/pep.py" ] && (git clone 'https://zxq.co/ripple/pep.py.git' "${srcdir}/pep.py" || die 1 "Unable to fetch Sunpy/pep.py") || edebug "Directory $srcdir/lets alredy exists"
+
+	# Configure
+	git submodule init "${srcdir}/pep.py" || die 1 "Unable to init submodules in $srcdir/pep.py"
+	git submodule update "${srcdir}/pep.py" || die 1 "Unable to update submodules in $srcdir/pep.py"
+
+	[ -e "${srcdir}/pep.py/requirements.txt" ] && (pip3 install -r "${srcdir}/pep.py/requirements.txt" && edebug "pip3 returned true for $srcdir/lets/requirements.txt" || die "pip3 failed to fetch required packages") || die 1 "File ${srcdir}/pep.py/requirements.txt does not exists"
 }
 
 # LOGIC
@@ -151,17 +161,18 @@ checkroot "$@" && while [[ "$#" -ge '0' ]]; do case "$1" in
 		[ -z "$1" ] && die 2 "Argument --srcdir expects one value pointing to directory used for source files"
 		[ ! -d "$1" ] && die 2 "Argument --srcdir doesn't recognize '$1' as valid directory"
 		export srcdir="$1" ; shift 2
+
 	;;
 	-h|-\?|--help) printf "STUB: HELP_PAGE" && break ;; # TODO: Sanitize on variables
 	-d|--debug) export debug="true" ; shift 1 ;; # TODO: Sanitize on variables
 	--test) # STUB
 		[ -z "$directory" ] && export directory=""
 		[ -z "$srcdir" ] && export srcdir="/usr/src/"
-		configure_rippleapi
+		#configure_rippleapi
 		configure_lets
-		configure_avatarservergo
-		configure_pep_py
-		configure_hanayo
+		#configure_avatarservergo
+		#configure_pep_py
+		#configure_hanayo
 	;;
 	"") die 1 "Not Finished" ;;
 	*) die 2 "Argument '$1' is not recognized by ${FUNCNAME[0]}"; break
