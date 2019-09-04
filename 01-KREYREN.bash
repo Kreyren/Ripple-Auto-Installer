@@ -283,6 +283,7 @@ configure_ruri() {
 	# Check for GCC
 	if ! command -v "g++-9" >/dev/null; then die 1 "Command 'g++-9' is not executable" ; fi
 
+	# HOTFIX
 	(cd "${srcdir}/ruri/ruri" && g++-9 -std=c++17 lz4.c *cpp BCrypt/*c -D LINUX -I pathtosql/mysql/include -pthread -lmysqlcppconn -w -march=native -O2 || die 1 "Failed to compile ruri")
 
 }
