@@ -273,11 +273,17 @@ configure_nginx() {
 
 configure_ruri() {
 	# Fetch
-	if [ ! -e "${srcdir}/ruri" ]; then git clone 'https://github.com/rumoi/ruri.git' "${srcdir}/ruri" || die 1 "Unable to fetch rumoi/ruri"
+	if [ ! -e "${srcdir}/ruri" ]; then git clone 'https://github.com/kreyren/kruri.git' "${srcdir}/ruri" || die 1 "Unable to fetch rumoi/ruri"
 	elif [ -e "${srcdir}/ruri" ]; then edebug "Directory $srcdir/ruri alredy exists"
 	fi
 
-	die 1 "Waiting for makefile (https://github.com/rumoi/ruri/issues/9)"
+	# Check for required libs
+	[ ! -e "/usr/include/connman" ] && die 1 "Required libraries are not present, please install 'libmysqlcppconn-dev' package or it's alternative"
+
+	# Check for GCC
+	if ! command -v "g++-9" >/dev/null; then die 1 "Command 'g++-9' is not executable" ; fi
+
+	(cd "${srcdir}/ruri/ruri" && g++-9 -std=c++17 lz4.c *cpp BCrypt/*c -D LINUX -I pathtosql/mysql/include -pthread -lmysqlcppconn -w -march=native -O2 || die 1 "Failed to compile ruri")
 
 }
 
