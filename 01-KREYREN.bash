@@ -20,6 +20,18 @@ fi
 export maintainer="github.com/kreyren/Ripple-Auto-Installer"
 export GOPATH="${srcdir}/go"
 
+# FUNCTIONS
+
+# HELPER: Output public IP
+## WIP
+myip() {
+	# Fetch IP from hostname
+	if command -v "hostname" >/dev/null; then hostname -I 2>/dev/null && return 0; fi
+
+	# Fetch IP from remote server
+	if command -v "curl" >/dev/null; then curl 'ifconfig.me' 2>/dev/null && return 0; fi
+}
+
 configure_lets() {
 	# Fetch
 	egit-clone 'https://zxq.co/ripple/lets.git' "${srcdir}/lets"
