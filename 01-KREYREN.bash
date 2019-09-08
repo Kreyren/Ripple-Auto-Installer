@@ -269,7 +269,7 @@ configure_sora() {
 configure_mysql() {
 	if ! command -v "mysql_config" >/dev/null; then die 1 "Command 'myshql_config' is not executable" ; fi
 
-	die 0 "Mysql configuration is not finished"
+	die 1 "Mysql configuration is not finished"
 }
 
 # LOGIC
