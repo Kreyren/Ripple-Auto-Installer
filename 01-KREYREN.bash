@@ -237,7 +237,7 @@ configure_pep_py() {
 }
 
 configure_nginx() {
-	die 1
+	die 1 "nginx configuration is not finished"
 }
 
 
