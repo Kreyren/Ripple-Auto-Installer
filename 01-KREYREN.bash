@@ -45,11 +45,13 @@
 # Sanitization for API used
 # [ -e "/tmp/00-ripple-api.bash" ] && (source "/tmp/00-ripple-api.bash" || die 1 "Unable to fetch ripple API") || warn "Unable to source ripple-api, trying to fetch" && (wget "https://raw.githubusercontent.com/Kreyren/Ripple-Auto-Installer/kreyrenizing/00-ripple-api.bash" -O "/tmp/00-ripple-api.bash" || die 1 "Unable to fetch ripple-api") && (source "/tmp/00-ripple-api.bash" && einfo "ripple-api was fetched and sourced" || die 1 "Failed to source ripple-api")
 
-# Variables
+# VARIABLES
 export maintainer="github.com/kreyren/Ripple-Auto-Installer"
 export GOPATH="${srcdir}/go"
 
-# Error handling
+# HELPERS
+
+## Error handling
 if ! command -v "einfo" > /dev/null; then	einfo()	{	printf "INFO: %s\n" "$1"	1>&2	;	} fi
 if ! command -v "warn" > /dev/null; then	warn()	{	printf "WARN: %s\n" "$1"	1>&2	;	} fi
 if [ -n "$debug" ]; then
@@ -84,6 +86,28 @@ if ! command -v "die" > /dev/null; then	die()	{
 	esac }
 fi
 
+## HELPER: Output public IP
+myip() {
+	# Fetch IP from hostname
+	if command -v "hostname" >/dev/null; then hostname -I 2>/dev/null && return 0; fi
+
+	# Fetch IP from remote server
+	if command -v "curl" >/dev/null; then curl 'ifconfig.me' 2>/dev/null && return 0; fi
+}
+
+## HELPER: Sanitized git clone
+egit-clone() {
+	# SYNOPSIS: $0 [repository] [path]
+
+	# Sanitization
+	if ! command -v "git" >/dev/null; then die 1 "command 'git' is not executable"; fi
+	## Sanitization for $1
+	[[ "$1" != https://*.git ]] && die 1 "${FUNCNAME[0]}: Argument '$1' doesn't match 'https://*.git'"
+	# TODO: Sanitize $2
+
+	[ ! -d "$2" ] && (git clone "$1" "$2" && edebug "${FUNCNAME[0]}: cloned '$1' in '$2'" || die 1 "${FUNCNAME[0]}: Unable to clone '$1' in '$2'") || edebug "${FUNCNAME[0]}: Directory '$2' already exists for '$1', skipping.."
+}
+
 # FUNCTIONS
 
 checkroot() { # Check if executed as root, if not tries to use sudo if KREYREN variable is not blank
@@ -105,9 +129,7 @@ checkroot() { # Check if executed as root, if not tries to use sudo if KREYREN v
 
 configure_lets() {
 	# Fetch
-	if [ ! -e "${srcdir}/lets" ]; then git clone 'https://zxq.co/ripple/lets.git' "${srcdir}/lets" || die 1 "Unable to fetch ripple/lets"
-	elif [ -e "${srcdir}/lets" ]; then edebug "Directory $srcdir/lets alredy exists"
-	fi
+	egit-clone 'https://zxq.co/ripple/lets.git' "${srcdir}/lets"
 
 	# TODO: Sanitization on required deps
 	# TODO: pip can also be used
@@ -130,25 +152,17 @@ elif [ -e "${srcdir}/lets/build/" ]; then einfo "lets is already compiled"
 	die 0
 }
 
-myip() { # Helper to fetch IP
-	# Fetch IP from hostname
-	if command -v "hostname" >/dev/null; then hostname -I 2>/dev/null && return 0; fi
-
-	# Fetch IP from remote server
-	if command -v "curl" >/dev/null; then curl ifconfig.me 2>/dev/null && return 0; fi
-}
-
 configure_hanayo() {
 	# KREYRENIZE: golang-go on debian
 	if ! command -v "go" >/dev/null; then die 1 "Command 'go' is not executable" ; fi
 
 	# Fetch
 	if [ ! -e "${GOPATH}/src/zxq.co/ripple/hanayo" ]; then  go get -u 'zxq.co/ripple/hanayo' || die 1 "Unable to get hanayo using go"
-elif [ -e "${GOPATH}/src/zxq.co/ripple/hanayo" ]; then einfo "hanayo is already fetched"
+	elif [ -e "${GOPATH}/src/zxq.co/ripple/hanayo" ]; then einfo "hanayo is already fetched"
 	fi
 
 	if [ ! -e "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo" ]; then go build -o "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo" "${GOPATH}/src/zxq.co/ripple/hanayo/" || die 1 "Unable to build hanayo in ${GOPATH}/src/zxq.co/ripple/hanayo/hanayo"
-elif [ -e "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo" ]; then einfo "Hanayo is already compiled"
+	elif [ -e "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo" ]; then einfo "Hanayo is already compiled"
 	fi
 
 	# Config
@@ -239,9 +253,7 @@ configure_avatarservergo() {
 
 configure_pep_py() {
 	# Fetch - pep.py
-	if [ ! -e "${srcdir}/pep.py" ]; then git clone 'https://zxq.co/ripple/pep.py.git' "${srcdir}/pep.py" || die 1 "Unable to fetch Sunpy/pep.py"
-elif [ -e "${srcdir}/pep.py" ]; then edebug "Directory $srcdir/pep.py alredy exists"
-	fi
+	egit-clone 'https://zxq.co/ripple/pep.py.git' "${srcdir}/pep.py"
 
 	# Fetch deps
 	if [ ! -e "${srcdir}/pep.py/common" ]; then git clone 'https://zxq.co/ripple/ripple-python-common.git' "${srcdir}/pep.py/common" || die 1 "Unable to fetch Sunpy/pep.py/common from https://zxq.co/ripple/ripple-python-common.git"
@@ -273,9 +285,7 @@ configure_nginx() {
 
 configure_ruri() {
 	# Fetch
-	if [ ! -e "${srcdir}/ruri" ]; then git clone 'https://github.com/kreyren/kruri.git' "${srcdir}/ruri" || die 1 "Unable to fetch rumoi/ruri"
-	elif [ -e "${srcdir}/ruri" ]; then edebug "Directory $srcdir/ruri alredy exists"
-	fi
+	egit-clone 'https://github.com/kreyren/kruri.git' "${srcdir}/ruri"
 
 	# Check for required libs
 	[ ! -e "/usr/include/connman" ] && die 1 "Required libraries are not present, please install 'libmysqlcppconn-dev' package or it's alternative"
@@ -289,12 +299,10 @@ configure_ruri() {
 }
 
 configure_sora() {
-	if [ ! -e "${srcdir}/Sora" ]; then git clone 'https://github.com/Mempler/Sora' "${srcdir}/Sora" || die 1 "Unable to fetch rumoi/ruri"
-elif [ -e "${srcdir}/Sora" ]; then edebug "Directory $srcdir/Sora alredy exists"
-	fi
+	# Fetch
+	egit-clone 'https://github.com/Mempler/Sora' "${srcdir}/Sora"
 
 	die 1 "Sora configuration is not finished"
-
 }
 
 configure_mysql() {
