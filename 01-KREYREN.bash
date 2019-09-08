@@ -161,6 +161,7 @@ configure_pep_py() {
 	egit-clone 'https://zxq.co/ripple/pep.py.git' "${srcdir}/pep.py"
 
 	# Fetch deps
+	## This is hotfix since repositories in .gitmodules are useless shit to which we don't have access
 	egit-clone 'https://zxq.co/ripple/ripple-python-common.git' "${srcdir}/pep.py/common"
 
 	# Fetch deps for python
