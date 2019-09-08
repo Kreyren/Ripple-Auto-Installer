@@ -3,90 +3,22 @@
 
 # GLOBAL
 
-# Sanitization for API used
-# [ -e "/tmp/00-ripple-api.bash" ] && (source "/tmp/00-ripple-api.bash" || die 1 "Unable to fetch ripple API") || warn "Unable to source ripple-api, trying to fetch" && (wget "https://raw.githubusercontent.com/Kreyren/Ripple-Auto-Installer/kreyrenizing/00-ripple-api.bash" -O "/tmp/00-ripple-api.bash" || die 1 "Unable to fetch ripple-api") && (source "/tmp/00-ripple-api.bash" && einfo "ripple-api was fetched and sourced" || die 1 "Failed to source ripple-api")
+## KREYPI - INIT
+if ! command -v 'wget' >/dev/null && [ ! -e "/lib/bash/kreypi.bash" ]; then printf "FATAL: This script requires 'wget' to be executable for downloading of kreypi (https://github.com/RXT067/Scripts/tree/kreyren/kreypi) for further sourcing" ; exit 1 ; fi
+
+[ ! -e "/lib/bash" ] && (mkdir -p "/lib/bash" || printf "ERROR: Unable to make a new directory in /lib/bash" ; exit 1) || $([ -n "$debug" ] && printf "DEBUG: Created a new directory in '/lib/bash'")
+
+[ ! -e "/lib/bash/kreypi.bash" ] && (wget 'https://raw.githubusercontent.com/RXT067/Scripts/kreyren/kreypi/kreypi.bash' -O '/lib/bash/kreypi.bash') ||  $([ -n "$debug" ] && printf "DEBUG: File '/lib/bash/kreypi.bash' already exists")
+
+if [ -e "/lib/bash/kreypi.bash" ]; then
+	source "/lib/bash/kreypi.bash" && $([ -n "$debug" ] && printf "DEBUG: Kreypi in '/lib/bash/kreypi.bash' has been successfully sourced") || printf "FATAL: Unable to source '/lib/bash/kreypi.bash'" ; exit 1
+elif [ -e "/lib/bash/kreypi.bash" ]; then
+	printf "FATAL: Unable to source '/lib/bash/kreypi.bash' since path doesn't exists"
+fi
 
 # VARIABLES
 export maintainer="github.com/kreyren/Ripple-Auto-Installer"
 export GOPATH="${srcdir}/go"
-
-# HELPERS
-
-## Error handling
-if ! command -v "einfo" > /dev/null; then	einfo()	{	printf "INFO: %s\n" "$1"	1>&2	;	} fi
-if ! command -v "warn" > /dev/null; then	warn()	{	printf "WARN: %s\n" "$1"	1>&2	;	} fi
-if [ -n "$debug" ]; then
-	edebug()	{	printf "DEBUG: %s\n" "$1"	1>&2	; }
-else edebug() { true ; }
-fi
-if ! command -v "die" > /dev/null; then	die()	{
-	case $1 in
-		0|true)	([ -n "$debug" ] && edebug "Script returned true") ; exit "$1" ;;
-		1|false) # False
-			if [ -n "$2" ]; then printf "FATAL: %s\n" "$2" 1>&2 ; exit "$1"
-			elif [ -z "$2" ] ; then printf "FATAL: Script returned false $([ -n "$EUID" ] && printf "from EUID ($EUID)") ${FUNCNAME[0]}\n" 1>&2 ; exit "$1"
-			else die wtf
-			fi
-		;;
-		2) # Syntax err
-			if [ -n "$2" ]; then printf "FATAL: %s\n" "$2" 1>&2 ; exit "$1"
-			elif [ -z "$2" ]; then printf "FATAL: Syntax error $([ -n "$debug" ] && printf "$0 $1 $2 $3 in ${FUNCNAME[0]}")\n" 1>&2 ; exit "$1"
-			else die wtf
-			fi
-		;;
-		3) # Permission issue
-		if [ -n "$2" ]; then printf "FATAL: %s\n" "$2" 1>&2 ; exit "$1"
-		elif [ -z "$2" ]; then printf "FATAL: Unable to elevate root access from $([ -n "$EUID" ] && printf "EUID ($EUID)")\n" 1>&2	;	exit "$1"
-		else die wtf
-		fi
-		;;
-		# Custom
-    wtf) printf "FATAL: Unexpected result in ${FUNCNAME[0]}\n" ;;
-    kreyren) printf "Killed by kreyren\n" ;;
-		*)	printf "FATAL: %s\n" "$2" 1>&2 ; exit 1 ;;
-	esac }
-fi
-
-## HELPER: Output public IP
-myip() {
-	# Fetch IP from hostname
-	if command -v "hostname" >/dev/null; then hostname -I 2>/dev/null && return 0; fi
-
-	# Fetch IP from remote server
-	if command -v "curl" >/dev/null; then curl 'ifconfig.me' 2>/dev/null && return 0; fi
-}
-
-## HELPER: Sanitized git clone
-egit-clone() {
-	# SYNOPSIS: $0 [repository] [path]
-
-	# Sanitization
-	if ! command -v "git" >/dev/null; then die 1 "command 'git' is not executable"; fi
-	## Sanitization for $1
-	[[ "$1" != https://*.git ]] && die 1 "${FUNCNAME[0]}: Argument '$1' doesn't match 'https://*.git'"
-	# TODO: Sanitize $2
-
-	[ ! -d "$2" ] && (git clone "$1" "$2" && edebug "${FUNCNAME[0]}: cloned '$1' in '$2'" || die 1 "${FUNCNAME[0]}: Unable to clone '$1' in '$2'") || edebug "${FUNCNAME[0]}: Directory '$2' already exists for '$1', skipping.."
-}
-
-# FUNCTIONS
-
-checkroot() { # Check if executed as root, if not tries to use sudo if KREYREN variable is not blank
-  # Licenced by github.com/kreyren under GPL-2
-	if [[ "$EUID" == '0' ]]; then
-		return
-	elif [[ -x "$(command -v "sudo")" ]] && [ -n "$KREYREN" ]; then
-			einfo "Failed to aquire root permission, trying reinvoking with 'sudo' prefix"
-			sudo "$0" "$@" && edebug "Script has been executed with 'sudo' prefix" || die 3
-			die 0
-	elif [[ ! -x "$(command -v "sudo")" ]] && [ -n "$KREYREN" ]; then
-		einfo "Failed to aquire root permission, trying reinvoking as root user."
-		exec su -c "$0 $*" && edebug "Script has been executed with 'su' prefix" || die 3
-		die 0
-	else
-		die 3
-	fi
-}
 
 configure_lets() {
 	# Fetch
