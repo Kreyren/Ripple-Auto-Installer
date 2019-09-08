@@ -217,10 +217,7 @@ configure_pep_py() {
 	egit-clone 'https://zxq.co/ripple/pep.py.git' "${srcdir}/pep.py"
 
 	# Fetch deps
-	if [ ! -e "${srcdir}/pep.py/common" ]; then git clone 'https://zxq.co/ripple/ripple-python-common.git' "${srcdir}/pep.py/common" || die 1 "Unable to fetch Sunpy/pep.py/common from https://zxq.co/ripple/ripple-python-common.git"
-	elif [ ! -e "${srcdir}/pep.py/common" ]; then edebug "Directory $srcdir/pep.py/common alredy exists"
-	fi
-
+	egit-clone 'https://zxq.co/ripple/ripple-python-common.git' "${srcdir}/pep.py/common"
 
 	# Fetch deps for python
 	if ! command -v "pip3" >/dev/null; then die 1 "Command 'pip3' is not executable" ; fi
