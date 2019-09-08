@@ -34,20 +34,11 @@ myip() {
 
 configure_lets() {
 	# Fetch
-	egit-clone 'https://zxq.co/ripple/lets.git' "${srcdir}/lets"
+	egit-clone 'https://github.com/light-ripple/lets.git' "${srcdir}/lets"
 
 	# TODO: Sanitization on required deps
 	# TODO: pip can also be used
   if ! command -v "pip3" >/dev/null; then die 1 "Command 'pip3' is not executable" ; fi
-
-	[ ! -e "${srcdir}/lets/common" ] && (git clone 'https://zxq.co/ripple/ripple-python-common.git' "${srcdir}/lets/common" || die 1 "Unable to clone ripple-python-common.git")
-	[ ! -e "${srcdir}/lets/secret" ] && (git clone 'https://github.com/osufx/secret' "${srcdir}/lets/secret" || die 1 "Unable to clone lets-secret")
-	[ ! -e "${srcdir}/lets/pp/oppai-ng" ] && (git clone 'https://github.com/Francesco149/oppai-ng.git' "${srcdir}/lets/pp/oppai-ng" || die 1 "Unable to clone oppai-ng")
-	# No access rights
-	## git clone 'git@zxq.co:ripple/maniapp-osu-tools.git' "${srcdir}/lets/calc-no-replay" || die 1 "Unable to clone maniapp-osu-tools"
-	[ ! -e "${srcdir}/lets/pp/catch_the_pp" ] && (git clone 'https://zxq.co/ripple/catch-the-pp.git' "${srcdir}/lets/pp/catch_the_pp" || die 1 "Unable to clone cat-the-pp")
-
-	[ -e "${srcdir}/lets/requirements.txt" ] && (pip3 install -r "${srcdir}/lets/requirements.txt" && edebug "pip3 returned true for $srcdir/lets/requirements.txt" || die "pip3 failed to fetch required packages") || die 1 "File ${srcdir}/lets/requirements.txt doesn't exists"
 
 	# Compile
 	if [ ! -e "${srcdir}/lets/build/" ]; then (cd "${srcdir}/lets" && python3 "${srcdir}/lets/setup.py" build_ext --inplace  || die 1 "python failed for lets")
