@@ -1,45 +1,6 @@
 #!/usr/bin/env bash
 # Created by github.com/kreyren under the terms of GPL-2 (https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
-# ABSTRACT
-## fetch deps
-### Python 3.5.1 / expecting 3.6
-### PHP (5.6.4 tested)
-### MySQL (5.6.18 tested)
-#### local database
-#### sqlite
-#### mariadb
-### pep.py
-### lets
-### avatar-server
-### rippleapi
-### hanayo
-### nginx (1.9.11 tested)
-#### Alternatively Apache
-### orders?
-## Fetch repositories
-###X lets (https://zxq.co/ripple/lets)
-###X hanayo (https://zxq.co/ripple/hanayo)
-###X rippleapi (https://zxq.co/ripple/rippleapi)
-###X cheesegull (https://zxq.co/ripple/cheesegull) -> Removed based on uniminin
-###X avatarserver (https://zxq.co/Sunpy/avatar-server-go)
-###X pyp.pi (https://zxq.co/ripple/pep.py)
-## Configure everything (mysql pep.py lets avatar-server rippleapi hanayo nginx)
-### mysql
-#### Fetch package
-##### Debian: mysql-server / default-mysql-server / default-mysql-server-core (preffered?)
-### pep.py
-#### Deprecated 29 june 2019
-### LETS
-#### git submodule init && git submodule update -> https://gist.github.com/Kreyren/27bf5a6cf1aacba3d7b3fabdb8555c8b
-#### pip install -r requirements.txt
-##### pip reguired (DEBIAN: python3-pip)
-
-## Add ruri https://github.com/rumoi/ruri (replacement for pep.py)
-### Fast, but bad code quality
-## Add Sora https://github.com/Mempler/Sora (replacement for pep.py)
-## Add https://github.com/tojiru/scarlet (replacement for pep.py)
-
 # GLOBAL
 
 # Sanitization for API used
