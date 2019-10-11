@@ -4,16 +4,22 @@
 # GLOBAL
 
 ## KREYPI - INIT
-if ! command -v 'wget' >/dev/null && [ ! -e "/lib/bash/kreypi.bash" ]; then printf "FATAL: This script requires 'wget' to be executable for downloading of kreypi (https://github.com/RXT067/Scripts/tree/kreyren/kreypi) for further sourcing" ; exit 1 ; fi
+# Sanitycheck for fetch
+if ! command -v 'wget' >/dev/null && [ ! -e "/lib/bash/kreypi.bash" ]; then printf "FATAL: This script requires 'wget' to be executable for downloading of kreypi (https://github.com/RXT067/Scripts/tree/kreyren/kreypi) for further sourcing\n" ; exit 1 ; fi
 
-[ ! -e "/lib/bash" ] && (mkdir -p "/lib/bash" || printf "ERROR: Unable to make a new directory in /lib/bash" ; exit 1) || $([ -n "$debug" ] && printf "DEBUG: Created a new directory in '/lib/bash'")
+# Sanitycheck for /lib/bash
+# shellcheck disable=SC2154
+[ ! -e "/lib/bash" ] && { mkdir -p "/lib/bash" || printf "ERROR: Unable to make a new directory in /lib/bash\n" ; exit 1 ;} || { [ -n "$debug" ] && printf "DEBUG: Directory in '/lib/bash' already exists\n" ;}
 
-[ ! -e "/lib/bash/kreypi.bash" ] && (wget 'https://raw.githubusercontent.com/RXT067/Scripts/kreyren/kreypi/kreypi.bash' -O '/lib/bash/kreypi.bash') ||  $([ -n "$debug" ] && printf "DEBUG: File '/lib/bash/kreypi.bash' already exists")
+# Fetch
+[ ! -e "/lib/bash/kreypi.bash" ] && (wget 'https://raw.githubusercontent.com/RXT067/Scripts/kreyren/kreypi/kreypi.bash' -O '/lib/bash/kreypi.bash') || ([ -n "$debug" ] && printf "DEBUG: File '/lib/bash/kreypi.bash' already exists\n")
 
+# Source
 if [ -e "/lib/bash/kreypi.bash" ]; then
-	source "/lib/bash/kreypi.bash" && $([ -n "$debug" ] && printf "DEBUG: Kreypi in '/lib/bash/kreypi.bash' has been successfully sourced") || printf "FATAL: Unable to source '/lib/bash/kreypi.bash'" ; exit 1
-elif [ -e "/lib/bash/kreypi.bash" ]; then
-	printf "FATAL: Unable to source '/lib/bash/kreypi.bash' since path doesn't exists"
+	source "/lib/bash/kreypi.bash" || { printf "FATAL: Unable to source '/lib/bash/kreypi.bash'\n" ; exit 1 ;}
+  [ -n "$debug" ] && printf "DEBUG: Kreypi in '/lib/bash/kreypi.bash' has been successfully sourced\n"
+elif [ ! -e "/lib/bash/kreypi.bash" ]; then
+	printf "FATAL: Unable to source '/lib/bash/kreypi.bash' since path doesn't exists\n"
 fi
 
 # VARIABLES
@@ -156,20 +162,17 @@ configure_pep_py() {
 	egit-clone 'https://zxq.co/ripple/ripple-python-common.git' "${srcdir}/pep.py/common"
 
 	# Fetch deps for python
-	if ! command -v "pip3" >/dev/null; then die 1 "Command 'pip3' is not executable" ; fi
+	e_check_exec mysql_config
+	e_check_exec pip3
 
-	if [ -e "${srcdir}/pep.py/requirements.txt" ]; then (pip3 install -r "${srcdir}/pep.py/requirements.txt" && edebug "pip3 returned true for $srcdir/lets/requirements.txt" || die "pip3 failed to fetch required packages")
+	if [ -e "${srcdir}/pep.py/requirements.txt" ]; then { pip3 install -r "${srcdir}/pep.py/requirements.txt" && debug "pip3 returned true for $srcdir/lets/requirements.txt" || info "pip3 returned false" ;}
 	elif [ ! -e "${srcdir}/pep.py/requirements.txt" ]; then die 1 "File ${srcdir}/pep.py/requirements.txt does not exists"
 	fi
 
 	# Compile
-	if [ ! -e "${srcdir}/pep.py/build/" ]; then (cd "${srcdir}/pep.py" && python3 "${srcdir}/pep.py/setup.py" build_ext --inplace  || die 1 "python failed")
-	elif [ -e "${srcdir}/pep.py/build/" ]; then einfo "pep.py is already compiled"
+	if [ ! -e "${srcdir}/pep.py/build/" ]; then { cd "${srcdir}/pep.py" && python3 "${srcdir}/pep.py/setup.py" build_ext --inplace  || die 1 "python failed" ;}
+	elif [ -e "${srcdir}/pep.py/build/" ]; then info "pep.py is already compiled"
 	fi
-
-	# TODO: Sanitization for python required
-
-	die 0
 }
 
 configure_nginx() {
@@ -228,8 +231,8 @@ checkroot "$@" && while [[ "$#" -ge '0' ]]; do case "$1" in
 		#configure_rippleapi
 		#configure_lets
 		#configure_avatarservergo
-		#configure_pep_py
-		configure_hanayo
+		configure_pep_py
+		#configure_hanayo
 		#configure_ruri
 		#configure_sorano config.i
 		die 0
