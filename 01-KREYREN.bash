@@ -25,6 +25,7 @@ fi
 # VARIABLES
 export maintainer="github.com/kreyren/Ripple-Auto-Installer"
 export GOPATH="${srcdir}/go"
+[ -z "$PYTHON" ] && export PYTHON="3.6"
 
 # FUNCTIONS
 
@@ -40,15 +41,15 @@ myip() {
 
 configure_lets() {
 	# Fetch
-	egit-clone 'https://github.com/light-ripple/lets.git' "${srcdir}/lets"
+	egit-clone 'https://github.com/light-ripple/lets.git' "$srcdir/lets"
 
 	# TODO: Sanitization on required deps
 	# TODO: pip can also be used
-	e_check_exec pip3
+	e_check_exec "$PIP" | die 1
 
 	# Compile
-	if [ ! -e "${srcdir}/lets/build/" ]; then { cd "${srcdir}/lets" && python3 "${srcdir}/lets/setup.py" build_ext --inplace  || die 1 "python failed for lets" ;}
-	elif [ -e "${srcdir}/lets/build/" ]; then info "lets is already compiled"
+	if [ ! -e "$srcdir/lets/build/" ]; then { cd "$srcdir/lets" && "$PYTHON" "$srcdir/lets/setup.py" build_ext --inplace  || die 1 "$PYTHON failed for lets" ;}
+	elif [ -e "$srcdir/lets/build/" ]; then info "lets is already compiled"
 	fi
 }
 
@@ -71,7 +72,7 @@ configure_hanayo() {
 		'; ip:port from which to take requests.' \
 		"ListenTo=':45221'" \
 		'; Whether ListenTo is an unix socket.' \
-		[ "$(uname)" = "Linux" ] && printf '%s' "\'Unix=true\'" || printf '%s' "\'Unix=false\'"  \
+		[ "$(uname)" = @(Linux|FreeBSD|Darwin) ] && printf '%s' "\'Unix=true\'" || printf '%s' "\'Unix=false\'"  \
 		'; MySQL server DSN' \
 		'DSN='1.1.1.1'' \
 		'RedisEnable='false'' \
@@ -153,23 +154,23 @@ configure_avatarservergo() {
 
 configure_pep_py() {
 	# Fetch - pep.py
-	egit-clone 'https://zxq.co/ripple/pep.py.git' "${srcdir}/pep.py"
+	egit-clone 'https://zxq.co/ripple/pep.py.git' "$srcdir/pep.py"
 
 	# Fetch deps
 	## This is hotfix since repositories in .gitmodules are useless shit to which we don't have access
-	egit-clone 'https://zxq.co/ripple/ripple-python-common.git' "${srcdir}/pep.py/common"
+	egit-clone 'https://zxq.co/ripple/ripple-python-common.git' "$srcdir/pep.py/common"
 
 	# Fetch deps for python
-	e_check_exec mysql_config
-	e_check_exec pip3
+	e_check_exec mysql_config | die 1
+	e_check_exec "$PIP" | die 1
 
-	if [ -e "${srcdir}/pep.py/requirements.txt" ]; then { pip3 install -r "${srcdir}/pep.py/requirements.txt" && debug "pip3 returned true for $srcdir/lets/requirements.txt" || info "pip3 returned false" ;}
-	elif [ ! -e "${srcdir}/pep.py/requirements.txt" ]; then die 1 "File ${srcdir}/pep.py/requirements.txt does not exists"
+	if [ -e "$srcdir/pep.py/requirements.txt" ]; then { "$PIP" install -r "$srcdir/pep.py/requirements.txt" && debug "$PIP returned true for $srcdir/lets/requirements.txt" || info "$PIP returned false, either it's unable to fetch all requirements or all requirements are already installed (yes it's stupid and i can't die here fuck em)" ;}
+elif [ ! -e "$srcdir/pep.py/requirements.txt" ]; then die 1 "File ''$srcdir/pep.py/requirements.txt' does not exists"
 	fi
 
 	# Compile
-	if [ ! -e "${srcdir}/pep.py/build/" ]; then { cd "${srcdir}/pep.py" && python3 "${srcdir}/pep.py/setup.py" build_ext --inplace  || die 1 "python failed" ;}
-	elif [ -e "${srcdir}/pep.py/build/" ]; then info "pep.py is already compiled"
+	if [ ! -e "$srcdir/pep.py/build/" ]; then { cd "$srcdir/pep.py" && python3 "$srcdir/pep.py/setup.py" build_ext --inplace  || die 1 "python failed" ;}
+	elif [ -e "$srcdir/pep.py/build/" ]; then info "pep.py is already compiled"
 	fi
 }
 
@@ -207,6 +208,12 @@ configure_mysql() {
 }
 
 # LOGIC
+
+# Used python logic
+case "$PYTHON" in
+	3.6*|Python-3.6*|python-3.6*) export PIP="pip3" ; export PYTHON="python3" ;;
+	2.7*|Python-2.7*|python-2.7*) export PIP="pip" ; export PYTHON="python" ;;
+esac
 
 checkroot "$@" && while [[ "$#" -ge '0' ]]; do case "$1" in
 	-C|--directory)
