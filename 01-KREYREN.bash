@@ -54,12 +54,12 @@ configure_hanayo() {
 	#### Fetch
 	e_check_exec go | die 1
 
-	if [ ! -e "${GOPATH}/src/zxq.co/ripple/hanayo" ]; then  go get -u 'zxq.co/ripple/hanayo' || die 1 "Unable to get hanayo using go"
-	elif [ -e "${GOPATH}/src/zxq.co/ripple/hanayo" ]; then einfo "hanayo is already fetched"
+	if [ ! -e "$GOPATH/src/zxq.co/ripple/hanayo" ]; then  go get -u 'zxq.co/ripple/hanayo' || die 1 "Unable to get hanayo using go"
+	elif [ -e "$GOPATH/src/zxq.co/ripple/hanayo" ]; then einfo "hanayo is already fetched"
 	fi
 
-	if [ ! -e "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo" ]; then go build -o "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo" "${GOPATH}/src/zxq.co/ripple/hanayo/" || die 1 "Unable to build hanayo in ${GOPATH}/src/zxq.co/ripple/hanayo/hanayo"
-	elif [ -e "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo" ]; then einfo "Hanayo is already compiled"
+	if [ ! -e "$GOPATH/src/zxq.co/ripple/hanayo/hanayo" ]; then go build -o "$GOPATH/src/zxq.co/ripple/hanayo/hanayo" "$GOPATH/src/zxq.co/ripple/hanayo/" || die 1 "Unable to build hanayo in $GOPATH/src/zxq.co/ripple/hanayo/hanayo"
+	elif [ -e "$GOPATH/src/zxq.co/ripple/hanayo/hanayo" ]; then einfo "Hanayo is already compiled"
 	fi
 
 	#### Config
