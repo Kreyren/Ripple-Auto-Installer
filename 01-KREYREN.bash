@@ -44,14 +44,12 @@ configure_lets() {
 
 	# TODO: Sanitization on required deps
 	# TODO: pip can also be used
-  if ! command -v "pip3" >/dev/null; then die 1 "Command 'pip3' is not executable" ; fi
+	e_check_exec pip3
 
 	# Compile
-	if [ ! -e "${srcdir}/lets/build/" ]; then (cd "${srcdir}/lets" && python3 "${srcdir}/lets/setup.py" build_ext --inplace  || die 1 "python failed for lets")
-elif [ -e "${srcdir}/lets/build/" ]; then einfo "lets is already compiled"
+	if [ ! -e "${srcdir}/lets/build/" ]; then { cd "${srcdir}/lets" && python3 "${srcdir}/lets/setup.py" build_ext --inplace  || die 1 "python failed for lets" ;}
+	elif [ -e "${srcdir}/lets/build/" ]; then info "lets is already compiled"
 	fi
-
-	die 0
 }
 
 configure_hanayo() {
@@ -229,9 +227,9 @@ checkroot "$@" && while [[ "$#" -ge '0' ]]; do case "$1" in
 		[ -z "$directory" ] && export directory=""
 		[ -z "$srcdir" ] && export srcdir="/usr/src/"
 		#configure_rippleapi
-		#configure_lets
+		configure_lets
 		#configure_avatarservergo
-		configure_pep_py
+		#configure_pep_py
 		#configure_hanayo
 		#configure_ruri
 		#configure_sorano config.i
