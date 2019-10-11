@@ -22,11 +22,6 @@ elif [ ! -e "/lib/bash/kreypi.bash" ]; then
 	printf "FATAL: Unable to source '/lib/bash/kreypi.bash' since path doesn't exists\n"
 fi
 
-# VARIABLES
-export maintainer="github.com/kreyren/Ripple-Auto-Installer"
-export GOPATH="${srcdir}/go"
-[ -z "$PYTHON" ] && export PYTHON="3.6"
-
 # FUNCTIONS
 
 # HELPER: Output public IP
@@ -55,9 +50,10 @@ configure_lets() {
 
 configure_hanayo() {
 	# KREYRENIZE: golang-go on debian
-	if ! command -v "go" >/dev/null; then die 1 "Command 'go' is not executable" ; fi
 
-	# Fetch
+	#### Fetch
+	e_check_exec go | die 1
+
 	if [ ! -e "${GOPATH}/src/zxq.co/ripple/hanayo" ]; then  go get -u 'zxq.co/ripple/hanayo' || die 1 "Unable to get hanayo using go"
 	elif [ -e "${GOPATH}/src/zxq.co/ripple/hanayo" ]; then einfo "hanayo is already fetched"
 	fi
@@ -66,56 +62,58 @@ configure_hanayo() {
 	elif [ -e "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo" ]; then einfo "Hanayo is already compiled"
 	fi
 
-	# Config
+	#### Config
+	# Get DNS used on system
+	get_resolvconf_dns() { grep -F nameserver /etc/resolv.conf -m 1 | sed -E 's/^(nameserver\s)([^\s]*)/\2/' ;}
+
 	# TODO: Fetch IP from resolv.conf
+	# shellcheck disable=SC1078
 	[ ! -e "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo.conf" ] && printf '%s/n' \
 		'; ip:port from which to take requests.' \
-		"ListenTo=':45221'" \
+		"ListenTo=:45221" \
 		'; Whether ListenTo is an unix socket.' \
-		[ "$(uname)" = @(Linux|FreeBSD|Darwin) ] && printf '%s' "\'Unix=true\'" || printf '%s' "\'Unix=false\'"  \
+		"$(case "$(uname -s)" in Linux|FreeBSD|Darwin) printf '%s' 'Unix=true' ;; *) printf '%s' 'Unix=false' ; esac)" \
 		'; MySQL server DSN' \
-		'DSN='1.1.1.1'' \
-		'RedisEnable='false'' \
-		'AvatarURL='https://a.ripple.moe'' \
-		'BaseURL='https://ripple.moe'' \
-		'API='http://localhost:40001/api/v1/'' \
-		'BanchoAPI='https://c.ripple.moe'' \
-		'CheesegullAPI='https://storage.ripple.moe/api'' \
-		'APISecret='Potato'' \
+		"DSN=$([ -n "$(get_resolvconf_dns)" ] && { get_resolvconf_dns ;} || printf '%s' '1.1.1.1')" \
+		"RedisEnable=false" \
+		"AvatarURL=https://a.ripple.moe" \
+		"BaseURL=https://ripple.moe" \
+		"API=http://localhost:40001/api/v1/" \
+		"BanchoAPI=https://c.ripple.moe" \
+		"CheesegullAPI=https://storage.ripple.moe/api" \
+		"APISecret=Potato" \
 		'; If this is true, files will be served from the local server instead of the CDN.' \
-		'Offline='false'' \
+		"Offline='false'" \
 		'; Folder where all the non-go projects are contained, such as old-frontend, lets, ci-system. Used for changelog.' \
-		"MainRippleFolder='${srcdir}/Ripple'" \
+		"MainRippleFolder=$srcdir/Ripple" \
 		'; location folder of avatars, used for placing the avatars from the avatar change page.' \
-		'AvatarsFolder=' \
-		'CookieSecret=' \
-		'RedisMaxConnections='0'' \
-		'RedisNetwork=' \
-		'RedisAddress=' \
-		'RedisPassword=' \
-		'DiscordServer='https://discord.gg/sBxy77'' \
-		'BaseAPIPublic=' \
+		"AvatarsFolder=" \
+		"CookieSecret=" \
+		"RedisMaxConnections=0" \
+		"RedisNetwork=" \
+		"RedisAddress=" \
+		"RedisPassword=" \
+		"DiscordServer=https://discord.gg/sBxy77" \
+		"BaseAPIPublic=" \
 		'; This is a fake configuration value. All of the following from now on should only really be set in a production environment.' \
-		'Production=0' \
-		'MailgunDomain=' \
-		'MailgunPrivateAPIKey=' \
-		'MailgunPublicAPIKey=' \
-		'MailgunFrom='"Ripple" <noreply@ripple.moe>'' \
-		'RecaptchaSite=' \
-		'RecaptchaPrivate=' \
-		'DiscordOAuthID=' \
-		'DiscordOAuthSecret=' \
-		'DonorBotURL='https://donatebot.io/checkout/481111107394732043'' \
-		'DonorBotSecret=' \
-		'CoinbaseAPIKey=' \
-		'CoinbaseAPISecret=' \
-		'SentryDSN=' \
-		'IP_API='https://ip.zxq.co'' \
+		"Production=0" \
+		"MailgunDomain=" \
+		"MailgunPrivateAPIKey=" \
+		"MailgunPublicAPIKey= \
+		"MailgunFrom='Ripple <noreply@ripple.moe>'" \
+		"RecaptchaSite=" \
+		"RecaptchaPrivate=" \
+		"DiscordOAuthID=" \
+		"DiscordOAuthSecret=" \
+		"DonorBotURL=https://donatebot.io/checkout/481111107394732043" \
+		"DonorBotSecret=" \
+		"CoinbaseAPIKey=" \
+		"CoinbaseAPISecret=" \
+		"SentryDSN=" \
+		"IP_API=https://ip.zxq.co" \
 	> "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo.conf"
 
-	warn "Please configure ${GOPATH}/src/zxq.co/ripple/hanayo/hanayo.conf manually"
-
-	die 0
+	warn "Please configure '${GOPATH}/src/zxq.co/ripple/hanayo/hanayo.conf' manually"
 
 }
 
@@ -164,8 +162,8 @@ configure_pep_py() {
 	e_check_exec mysql_config | die 1
 	e_check_exec "$PIP" | die 1
 
-	if [ -e "$srcdir/pep.py/requirements.txt" ]; then { "$PIP" install -r "$srcdir/pep.py/requirements.txt" && debug "$PIP returned true for $srcdir/lets/requirements.txt" || info "$PIP returned false, either it's unable to fetch all requirements or all requirements are already installed (yes it's stupid and i can't die here fuck em)" ;}
-elif [ ! -e "$srcdir/pep.py/requirements.txt" ]; then die 1 "File ''$srcdir/pep.py/requirements.txt' does not exists"
+	if [ -e "$srcdir/pep.py/requirements.txt" ]; then { "$PYTHON" -m pip install -r "$srcdir/pep.py/requirements.txt" && debug "$PIP returned true for $srcdir/lets/requirements.txt" || die 1 "$PIP was unable to install all required dependencies" ;}
+	elif [ ! -e "$srcdir/pep.py/requirements.txt" ]; then die 1 "File '$srcdir/pep.py/requirements.txt' does not exists"
 	fi
 
 	# Compile
@@ -207,6 +205,12 @@ configure_mysql() {
 	die 1 "Mysql configuration is not finished"
 }
 
+# VARIABLES
+export maintainer="github.com/kreyren/Ripple-Auto-Installer"
+export GOPATH="$srcdir/go"
+# If python is not exported, use 3.6
+[ -z "$PYTHON" ] && export PYTHON="3.6"
+
 # LOGIC
 
 # Used python logic
@@ -234,9 +238,9 @@ checkroot "$@" && while [[ "$#" -ge '0' ]]; do case "$1" in
 		[ -z "$directory" ] && export directory=""
 		[ -z "$srcdir" ] && export srcdir="/usr/src/"
 		#configure_rippleapi
-		configure_lets
+		#configure_lets
 		#configure_avatarservergo
-		#configure_pep_py
+		configure_pep_py
 		#configure_hanayo
 		#configure_ruri
 		#configure_sorano config.i
