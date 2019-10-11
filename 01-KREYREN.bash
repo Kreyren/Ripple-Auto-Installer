@@ -68,86 +68,84 @@ configure_hanayo() {
 
 	# TODO: Fetch IP from resolv.conf
 	# shellcheck disable=SC1078
-	[ ! -e "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo.conf" ] && printf '%s/n' \
-		'; ip:port from which to take requests.' \
-		"ListenTo=:45221" \
-		'; Whether ListenTo is an unix socket.' \
-		"$(case "$(uname -s)" in Linux|FreeBSD|Darwin) printf '%s' 'Unix=true' ;; *) printf '%s' 'Unix=false' ; esac)" \
-		'; MySQL server DSN' \
-		"DSN=$([ -n "$(get_resolvconf_dns)" ] && { get_resolvconf_dns ;} || printf '%s' '1.1.1.1')" \
-		"RedisEnable=false" \
-		"AvatarURL=https://a.ripple.moe" \
-		"BaseURL=https://ripple.moe" \
-		"API=http://localhost:40001/api/v1/" \
-		"BanchoAPI=https://c.ripple.moe" \
-		"CheesegullAPI=https://storage.ripple.moe/api" \
-		"APISecret=Potato" \
-		'; If this is true, files will be served from the local server instead of the CDN.' \
-		"Offline='false'" \
-		'; Folder where all the non-go projects are contained, such as old-frontend, lets, ci-system. Used for changelog.' \
-		"MainRippleFolder=$srcdir/Ripple" \
-		'; location folder of avatars, used for placing the avatars from the avatar change page.' \
-		"AvatarsFolder=" \
-		"CookieSecret=" \
-		"RedisMaxConnections=0" \
-		"RedisNetwork=" \
-		"RedisAddress=" \
-		"RedisPassword=" \
-		"DiscordServer=https://discord.gg/sBxy77" \
-		"BaseAPIPublic=" \
-		'; This is a fake configuration value. All of the following from now on should only really be set in a production environment.' \
-		"Production=0" \
-		"MailgunDomain=" \
-		"MailgunPrivateAPIKey=" \
-		"MailgunPublicAPIKey= \
-		"MailgunFrom='Ripple <noreply@ripple.moe>'" \
-		"RecaptchaSite=" \
-		"RecaptchaPrivate=" \
-		"DiscordOAuthID=" \
-		"DiscordOAuthSecret=" \
-		"DonorBotURL=https://donatebot.io/checkout/481111107394732043" \
-		"DonorBotSecret=" \
-		"CoinbaseAPIKey=" \
-		"CoinbaseAPISecret=" \
-		"SentryDSN=" \
-		"IP_API=https://ip.zxq.co" \
-	> "${GOPATH}/src/zxq.co/ripple/hanayo/hanayo.conf"
+	[ ! -e "$GOPATH/src/zxq.co/ripple/hanayo/hanayo.conf" ] && printf '%s\n' \
+	  '; ip:port from which to take requests.' \
+	  "ListenTo=:45221" \
+	  '; Whether ListenTo is an unix socket.' \
+	  "$(case "$(uname -s)" in Linux|FreeBSD|Darwin) printf '%s' 'Unix=true' ;; *) printf '%s' 'Unix=false' ; esac)" \
+	  '; MySQL server DSN' \
+	  "DSN=$([ -n "$(get_resolvconf_dns)" ] && { get_resolvconf_dns ;} || printf '%s' '1.1.1.1')" \
+	  "RedisEnable=false" \
+	  "AvatarURL=https://a.ripple.moe" \
+	  "BaseURL=https://ripple.moe" \
+	  "API=http://localhost:40001/api/v1/" \
+	  "BanchoAPI=https://c.ripple.moe" \
+	  "CheesegullAPI=https://storage.ripple.moe/api" \
+	  "APISecret=Potato" \
+	  '; If this is true, files will be served from the local server instead of the CDN.' \
+	  "Offline='false'" \
+	  '; Folder where all the non-go projects are contained, such as old-frontend, lets, ci-system. Used for changelog.' \
+	  "MainRippleFolder=$srcdir/Ripple" \
+	  '; location folder of avatars, used for placing the avatars from the avatar change page.' \
+	  "AvatarsFolder=" \
+	  "CookieSecret=" \
+	  "RedisMaxConnections=0" \
+	  "RedisNetwork=" \
+	  "RedisAddress=" \
+	  "RedisPassword=" \
+	  "DiscordServer=https://discord.gg/sBxy77" \
+	  "BaseAPIPublic=" \
+	  '; This is a fake configuration value. All of the following from now on should only really be set in a production environment.' \
+	  "Production=0" \
+	  "MailgunDomain=" \
+	  "MailgunPrivateAPIKey=" \
+	  "MailgunPublicAPIKey=" \
+	  "MailgunFrom='Ripple <noreply@ripple.moe>'" \
+	  "RecaptchaSite=" \
+	  "RecaptchaPrivate=" \
+	  "DiscordOAuthID=" \
+	  "DiscordOAuthSecret=" \
+	  "DonorBotURL=https://donatebot.io/checkout/481111107394732043" \
+	  "DonorBotSecret=" \
+	  "CoinbaseAPIKey=" \
+	  "CoinbaseAPISecret=" \
+	  "SentryDSN=" \
+	  "IP_API=https://ip.zxq.co" \
+	> "$GOPATH/src/zxq.co/ripple/hanayo/hanayo.conf"
 
-	warn "Please configure '${GOPATH}/src/zxq.co/ripple/hanayo/hanayo.conf' manually"
+	warn "Please configure '$GOPATH/src/zxq.co/ripple/hanayo/hanayo.conf' manually"
 
 }
 
 configure_rippleapi() {
 	# KREYRENIZE: golang-go on debian
-	if ! command -v "go" >/dev/null; then die 1 "Command 'go' is not executable" ; fi
 
-	# Fetch
-	if [ ! -e "${GOPATH}/src/zxq.co/ripple/rippleapi" ]; then go get -u 'zxq.co/ripple/rippleapi' || die 1 "Unable to get rippleapi using go"
-	elif [ -e "${GOPATH}/src/zxq.co/ripple/rippleapi" ]; then einfo "rippleapi is already fetched"
+	#### Fetch
+	e_check_exec go | die 1
+
+	if [ ! -e "$GOPATH/src/zxq.co/ripple/rippleapi" ]; then go get -u 'zxq.co/ripple/rippleapi' || die 1 "Unable to get rippleapi using go"
+	elif [ -e "$GOPATH/src/zxq.co/ripple/rippleapi" ]; then einfo "rippleapi is already fetched"
 	fi
 
-	if [ ! -e "${GOPATH}/src/zxq.co/ripple/rippleapi/rippleapi" ]; then go build -o "${GOPATH}/src/zxq.co/ripple/rippleapi/rippleapi" "${GOPATH}/src/zxq.co/ripple/rippleapi/" || die 1 "Unable to build rippleapi in ${GOPATH}/src/zxq.co/ripple/rippleapi/rippleapi"
-	elif [ -e "${GOPATH}/src/zxq.co/ripple/rippleapi/rippleapi" ]; then einfo "rippleapi is already compiled"
+	if [ ! -e "$GOPATH/src/zxq.co/ripple/rippleapi/rippleapi" ]; then go build -o "$GOPATH/src/zxq.co/ripple/rippleapi/rippleapi" "$GOPATH/src/zxq.co/ripple/rippleapi/" || die 1 "Unable to build rippleapi in $GOPATH/src/zxq.co/ripple/rippleapi/rippleapi"
+	elif [ -e "$GOPATH/src/zxq.co/ripple/rippleapi/rippleapi" ]; then einfo "rippleapi is already compiled"
 	fi
-
-	die 0
 }
 
 configure_avatarservergo() {
 	# KREYRENIZE: golang-go on debian
-	if ! command -v "go" >/dev/null; then die 1 "Command 'go' is not executable" ; fi
 
-	# Fetch
-	if [ ! -e "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go" ]; then go get -u 'zxq.co/Sunpy/avatar-server-go' || die 1 "Unable to get avatar-server-go using go"
-	elif [ -e "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go" ]; then einfo "avatar-server-go is already fetched"
+	#### Fetch
+	e_check_exec go | die 1
+
+	if [ ! -e "$GOPATH/src/zxq.co/Sunpy/avatar-server-go" ]; then go get -u 'zxq.co/Sunpy/avatar-server-go' || die 1 "Unable to get avatar-server-go using go"
+	elif [ -e "$GOPATH/src/zxq.co/Sunpy/avatar-server-go" ]; then einfo "avatar-server-go is already fetched"
 	fi
 
 	# Compile
-	if [ ! -e "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" ]; then go build -o "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/" || die 1 "Unable to build avatar-server-go in ${GOPATH}/src/zxq.co/Sunpy/avatar-server-go"
-	elif [ -e "${GOPATH}/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" ]; then einfo "avatar-server-go is already compiled"
+	if [ ! -e "$GOPATH/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" ]; then go build -o "$GOPATH/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" "$GOPATH/src/zxq.co/Sunpy/avatar-server-go/" || die 1 "Unable to build avatar-server-go in $GOPATH/src/zxq.co/Sunpy/avatar-server-go"
+	elif [ -e "$GOPATH/src/zxq.co/Sunpy/avatar-server-go/avatar-server-go" ]; then einfo "avatar-server-go is already compiled"
 	fi
-
-	die 0
 }
 
 configure_pep_py() {
