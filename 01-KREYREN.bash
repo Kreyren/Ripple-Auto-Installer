@@ -63,8 +63,8 @@ configure_hanayo() {
 	  "ListenTo=:45221" \
 	  '; Whether ListenTo is an unix socket.' \
 	  "$(case "$(uname -s)" in Linux|FreeBSD|Darwin) printf '%s' 'Unix=true' ;; *) printf '%s' 'Unix=false' ; esac)" \
-	  '; MySQL server DSN' \
-	  "DSN=$([ -n "$(get_resolvconf_dns)" ] && { get_resolvconf_dns ;} || printf '%s' '1.1.1.1')" \
+	  '; MySQL server DNS' \
+	  "DNS=$([ -n "$(get_resolvconf_dns)" ] && { get_resolvconf_dns ;} || printf '%s' '1.1.1.1')" \
 	  "RedisEnable=false" \
 	  "AvatarURL=https://a.ripple.moe" \
 	  "BaseURL=https://ripple.moe" \
