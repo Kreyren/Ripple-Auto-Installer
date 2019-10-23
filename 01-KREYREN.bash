@@ -189,7 +189,7 @@ configure_sora() {
 }
 
 configure_mysql() {
-	if ! command -v "mysql_config" >/dev/null; then die 1 "Command 'myshql_config' is not executable" ; fi
+	if ! command -v "mysql_config" >/dev/null; then die 1 "Command 'mysql_config' is not executable" ; fi
 
 	die 1 "Mysql configuration is not finished"
 }
@@ -210,15 +210,15 @@ esac
 
 # TODO: Export preffered ports for configuration
 
-checkroot "$@" && while [[ "$#" -ge '0' ]]; do case "$1" in
+checkroot "$@" && while [ "$#" -ge '0' ]; do case "$1" in
 	-C|--directory)
-		[[ "$2" != -* ]] && die 2 "Argument --directory doesn't expect two variables"
+		[ "$2" != -* ] && die 2 "Argument --directory doesn't expect two variables"
 		[ -z "$1" ] && die 2 "Argument --directory expects one value pointing to directory used"
 		[ ! -d "$1" ] && die 2 "Argument --directory doesn't recognize '$1' as valid directory"
 		export directory="$1" ;	shift 2
 	;;
 	--srcdir)
-		[[ "$2" != -* ]] && die 2 "Argument --srcdir doesn't expect two variables"
+		[ "$2" != -* ] && die 2 "Argument --srcdir doesn't expect two variables"
 		[ -z "$1" ] && die 2 "Argument --srcdir expects one value pointing to directory used for source files"
 		[ ! -d "$1" ] && die 2 "Argument --srcdir doesn't recognize '$1' as valid directory"
 		export srcdir="$1" ; shift 2
