@@ -34,7 +34,7 @@ configure_lets() {
 
 	# TODO: Sanitization on required deps
 	# TODO: pip can also be used
-	e_check_exec "$PIP" | die 1
+	e_check_exec "$PIP" | die
 
 	# Compile
 	if [ ! -e "$srcdir/lets/build/" ]; then { cd "$srcdir/lets" && "$PYTHON" "$srcdir/lets/setup.py" build_ext --inplace  || die 1 "$PYTHON failed for lets" ;}
@@ -119,7 +119,7 @@ configure_rippleapi() {
 	# KREYRENIZE: golang-go on debian
 
 	#### Fetch
-	e_check_exec go | die 1
+	e_check_exec go | die
 
 	if [ ! -e "$GOPATH/src/zxq.co/ripple/rippleapi" ]; then go get -u 'zxq.co/ripple/rippleapi' || die 1 "Unable to get rippleapi using go"
 	elif [ -e "$GOPATH/src/zxq.co/ripple/rippleapi" ]; then einfo "rippleapi is already fetched"
@@ -134,7 +134,7 @@ configure_avatarservergo() {
 	# KREYRENIZE: golang-go on debian
 
 	#### Fetch
-	e_check_exec go | die 1
+	e_check_exec go | die
 
 	if [ ! -e "$GOPATH/src/zxq.co/Sunpy/avatar-server-go" ]; then go get -u 'zxq.co/Sunpy/avatar-server-go' || die 1 "Unable to get avatar-server-go using go"
 	elif [ -e "$GOPATH/src/zxq.co/Sunpy/avatar-server-go" ]; then einfo "avatar-server-go is already fetched"
@@ -155,8 +155,8 @@ configure_pep_py() {
 	egit-clone 'https://zxq.co/ripple/ripple-python-common.git' "$srcdir/pep.py/common"
 
 	# Fetch deps for python
-	e_check_exec mysql_config | die 1
-	e_check_exec "$PIP" | die 1
+	e_check_exec mysql_config | die
+	e_check_exec "$PIP" | die
 
 	if [ -e "$srcdir/pep.py/requirements.txt" ]; then { "$PYTHON" -m pip install -r "$srcdir/pep.py/requirements.txt" && debug "$PIP returned true for $srcdir/lets/requirements.txt" || die 1 "$PIP was unable to install all required dependencies" ;}
 	elif [ ! -e "$srcdir/pep.py/requirements.txt" ]; then die 1 "File '$srcdir/pep.py/requirements.txt' does not exists"
