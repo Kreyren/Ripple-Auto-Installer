@@ -53,18 +53,14 @@ configure_hanayo() {
 	fi
 
 	#### Config
-	# Get DNS used on system
-	get_resolvconf_dns() { grep -F nameserver /etc/resolv.conf -m 1 | sed -E 's/^(nameserver\s)([^\s]*)/\2/' ;}
-
-	# TODO: Fetch IP from resolv.conf
 	# shellcheck disable=SC1078
 	[ ! -e "$GOPATH/src/zxq.co/ripple/hanayo/hanayo.conf" ] && printf '%s\n' \
 	  '; ip:port from which to take requests.' \
 	  "ListenTo=:45221" \
 	  '; Whether ListenTo is an unix socket.' \
 	  "$(case "$(uname -s)" in Linux|FreeBSD|Darwin) printf '%s' 'Unix=true' ;; *) printf '%s' 'Unix=false' ; esac)" \
-	  '; MySQL server DNS' \
-	  "DNS=$([ -n "$(get_resolvconf_dns)" ] && { get_resolvconf_dns ;} || printf '%s' '1.1.1.1')" \
+	  '; MySQL server DSN' \
+	  "DSN=" \
 	  "RedisEnable=false" \
 	  "AvatarURL=https://a.ripple.moe" \
 	  "BaseURL=https://ripple.moe" \
