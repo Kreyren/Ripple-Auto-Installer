@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Created by github.com/kreyren under the terms of GPL-2 (https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
+# shellcheck disable=SC2015
+## False trigger
+
 # GLOBAL
 
 ## KREYPI - INIT
@@ -16,6 +19,7 @@ if ! command -v 'wget' >/dev/null && [ ! -e "/lib/bash/kreypi.bash" ]; then prin
 
 # Source
 if [ -e "/lib/bash/kreypi.bash" ]; then
+	# shellcheck disable=SC1091
 	source "/lib/bash/kreypi.bash" || { printf "FATAL: Unable to source '/lib/bash/kreypi.bash'\n" ; exit 1 ;}
   [ -n "$debug" ] && printf "DEBUG: Kreypi in '/lib/bash/kreypi.bash' has been successfully sourced\n"
 elif [ ! -e "/lib/bash/kreypi.bash" ]; then
@@ -51,6 +55,7 @@ configure_hanayo() {
 	#### Config
 	# Check if mysql is exported
 	## TODO: Correct die?
+	## TODO: Implement mysql
 	[ -z "$mysql_username" ] || [ -z "$mysql_password" ] && die 2 "MySQL configuration is not exported, unable to make a configuration file for hanayo"
 
 	# shellcheck disable=SC1078
@@ -80,6 +85,7 @@ configure_hanayo() {
 	  "RedisNetwork=" \
 	  "RedisAddress=" \
 	  "RedisPassword=" \
+		'; This is example' \
 	  "DiscordServer=https://discord.gg/sBxy77" \
 	  "BaseAPIPublic=" \
 	  '; This is a fake configuration value. All of the following from now on should only really be set in a production environment.' \
@@ -92,6 +98,7 @@ configure_hanayo() {
 	  "RecaptchaPrivate=" \
 	  "DiscordOAuthID=" \
 	  "DiscordOAuthSecret=" \
+		'; This is example' \
 	  "DonorBotURL=https://donatebot.io/checkout/481111107394732043" \
 	  "DonorBotSecret=" \
 	  "CoinbaseAPIKey=" \
@@ -168,7 +175,7 @@ configure_nginx() {
 
 configure_ruri() {
 	# Fetch
-	egit-clone 'https://github.com/kreyren/kruri.git' "${srcdir}/ruri"
+	egit-clone 'https://github.com/kreyren/kruri.git' "$srcdir/ruri"
 
 	# Check for required libs
 	[ ! -e "/usr/include/connman" ] && die 1 "Required libraries are not present, please install 'libmysqlcppconn-dev' package or it's alternative"
@@ -176,8 +183,8 @@ configure_ruri() {
 	# Check for GCC
 	if ! command -v "g++-9" >/dev/null; then die 1 "Command 'g++-9' is not executable" ; fi
 
-	# HOTFIX
-	(cd "${srcdir}/ruri/ruri" && g++-9 -std=c++17 lz4.c *cpp BCrypt/*c -D LINUX -I pathtosql/mysql/include -pthread -lmysqlcppconn -w -march=native -O2 || die 1 "Failed to compile ruri")
+	# HOTFIX - SC is ignored since this is hotfix
+	( { cd "$srcdir/ruri/ruri" || die 1 "Unable to change directory in '$srcdir/ruri/ruri'" ;} && g++-9 -std=c++17 lz4.c *cpp BCrypt/*c -D LINUX -I pathtosql/mysql/include -pthread -lmysqlcppconn -w -march=native -O2 || die 1 "Failed to compile ruri")
 
 }
 
@@ -212,13 +219,13 @@ esac
 
 checkroot "$@" && while [ "$#" -ge '0' ]; do case "$1" in
 	-C|--directory)
-		[ "$2" != -* ] && die 2 "Argument --directory doesn't expect two variables"
+		case $2 in -*) die 2 "Argument --directory doesn't expect two variables" ; esac
 		[ -z "$1" ] && die 2 "Argument --directory expects one value pointing to directory used"
 		[ ! -d "$1" ] && die 2 "Argument --directory doesn't recognize '$1' as valid directory"
 		export directory="$1" ;	shift 2
 	;;
 	--srcdir)
-		[ "$2" != -* ] && die 2 "Argument --srcdir doesn't expect two variables"
+		case $2 in -*) die 2 "Argument --srcdir doesn't expect two variables" ; esac
 		[ -z "$1" ] && die 2 "Argument --srcdir expects one value pointing to directory used for source files"
 		[ ! -d "$1" ] && die 2 "Argument --srcdir doesn't recognize '$1' as valid directory"
 		export srcdir="$1" ; shift 2
@@ -238,6 +245,7 @@ checkroot "$@" && while [ "$#" -ge '0' ]; do case "$1" in
 		die 0
 	;;
 	--base) # STUB
+		die 1 "Not Finished"
 		[ -z "$directory" ] && export directory=""
 		[ -z "$srcdir" ] && export srcdir="/usr/src/"
 		configure_rippleapi
@@ -246,11 +254,6 @@ checkroot "$@" && while [ "$#" -ge '0' ]; do case "$1" in
 		configure_pep_py
 		configure_hanayo
 		die 0
-	;;
-	--uniminin)
-		[ -z "$directory" ] && export directory=""
-		[ -z "$srcdir" ] && export srcdir="$(pwd)"
-		configure_lets
 	;;
 	"") die 1 "Not Finished" ;;
 	*) die 2 "Argument '$1' is not recognized by ${FUNCNAME[0]}"; break
