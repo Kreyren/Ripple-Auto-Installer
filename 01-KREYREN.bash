@@ -208,6 +208,8 @@ case "$PYTHON" in
 	2.7*|Python-2.7*|python-2.7*) export PIP="pip" ; export PYTHON="python" ;;
 esac
 
+# TODO: Export preffered ports for configuration
+
 checkroot "$@" && while [[ "$#" -ge '0' ]]; do case "$1" in
 	-C|--directory)
 		[[ "$2" != -* ]] && die 2 "Argument --directory doesn't expect two variables"
