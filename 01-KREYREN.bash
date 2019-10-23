@@ -42,25 +42,26 @@ configure_hanayo() {
 	# KREYRENIZE: golang-go on debian
 
 	#### Fetch
-	e_check_exec go | die 1
+	e_check_exec go | die
 
-	if [ ! -e "$GOPATH/src/zxq.co/ripple/hanayo" ]; then  go get -u 'zxq.co/ripple/hanayo' || die 1 "Unable to get hanayo using go"
+	if [ ! -e "$GOPATH/src/zxq.co/ripple/hanayo" ]; then go get -u 'zxq.co/ripple/hanayo' || die 1 "Unable to get hanayo using go"
 	elif [ -e "$GOPATH/src/zxq.co/ripple/hanayo" ]; then einfo "hanayo is already fetched"
 	fi
 
-	if [ ! -e "$GOPATH/src/zxq.co/ripple/hanayo/hanayo" ]; then go build -o "$GOPATH/src/zxq.co/ripple/hanayo/hanayo" "$GOPATH/src/zxq.co/ripple/hanayo/" || die 1 "Unable to build hanayo in $GOPATH/src/zxq.co/ripple/hanayo/hanayo"
-	elif [ -e "$GOPATH/src/zxq.co/ripple/hanayo/hanayo" ]; then einfo "Hanayo is already compiled"
-	fi
-
 	#### Config
+	# Check if mysql is exported
+	## TODO: Correct die?
+	[ -z "$mysql_username" ] || [ -z "$mysql_password" ] && die 2 "MySQL configuration is not exported, unable to make a configuration file for hanayo"
+
 	# shellcheck disable=SC1078
+	## QA: why shellcheck?
 	[ ! -e "$GOPATH/src/zxq.co/ripple/hanayo/hanayo.conf" ] && printf '%s\n' \
 	  '; ip:port from which to take requests.' \
 	  "ListenTo=:45221" \
 	  '; Whether ListenTo is an unix socket.' \
 	  "$(case "$(uname -s)" in Linux|FreeBSD|Darwin) printf '%s' 'Unix=true' ;; *) printf '%s' 'Unix=false' ; esac)" \
 	  '; MySQL server DSN' \
-	  "DSN=" \
+	  "DSN=$mysql_username:$mysql_password@tcp(127.0.0.1:3306)/ripple" \
 	  "RedisEnable=false" \
 	  "AvatarURL=https://a.ripple.moe" \
 	  "BaseURL=https://ripple.moe" \
@@ -100,6 +101,10 @@ configure_hanayo() {
 	> "$GOPATH/src/zxq.co/ripple/hanayo/hanayo.conf"
 
 	warn "Please configure '$GOPATH/src/zxq.co/ripple/hanayo/hanayo.conf' manually"
+
+	if [ ! -e "$GOPATH/src/zxq.co/ripple/hanayo/hanayo" ]; then go build -o "$GOPATH/src/zxq.co/ripple/hanayo/hanayo" "$GOPATH/src/zxq.co/ripple/hanayo/" || die 1 "Unable to build hanayo in $GOPATH/src/zxq.co/ripple/hanayo/hanayo"
+	elif [ -e "$GOPATH/src/zxq.co/ripple/hanayo/hanayo" ]; then einfo "Hanayo is already compiled"
+	fi
 
 }
 
